@@ -30,7 +30,6 @@ class AddExerciseDialogFragment : DialogFragment() {
 
     override fun onCancel(dialog: DialogInterface) {
         super.onCancel(dialog)
-        // Handle dialog cancellation if needed
     }
 
     private fun addExercise(exerciseName: String) {
