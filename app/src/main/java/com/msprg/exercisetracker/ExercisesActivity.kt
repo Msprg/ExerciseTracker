@@ -6,8 +6,6 @@ import android.os.Bundle
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ListView
-import android.widget.Toast
-import androidx.core.view.get
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -42,37 +40,48 @@ class ExercisesActivity : AppCompatActivity() {
             dialogFragment.show(supportFragmentManager, "AddExerciseDialog")
         }
 
-
         adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, exercises)
         exerciseList.adapter = adapter
 
         exerciseList.setOnItemClickListener { parent, view, position, id ->
-            val element = parent.getItemAtPosition(position) // The item that was clicked
+            val element = exercises[position] // Access the clicked item directly from the list
+            // Handle the item click event
         }
 
         exerciseList.setOnItemLongClickListener { item, view, int, long ->
+            //val selectedExercise = exercises[int] // Access the long clicked item directly from the list
+            val selectedExercise = adapter.getItem(int)
             lifecycleScope.launch {
-                DB.delete(exercises[int])
+                withContext(Dispatchers.IO) {
+                    if (selectedExercise != null) {
+                        selectedExercise.uid?.let { DB.deleteByUid(it) }
+                    }
+                }
             }
-            //adapter.remove(item.adapter.getItem(int) as String?)
-            adapter.remove(exercises[int])
+            adapter.remove(selectedExercise)
             adapter.notifyDataSetChanged()
             true
         }
-
-
     }
 
     fun addExercise(exerciseName: String) {
-        val addee = ExerciseData(null, exerciseName, "")
-        // Add the exercise to the adapter and update the list
-        adapter.add(addee)
-        adapter.notifyDataSetChanged()
+        val exercise = ExerciseData(name = exerciseName, description = "")
 
         lifecycleScope.launch {
-            withContext(Dispatchers.IO) {
-                DB.insert(addee)
+            val insertedId = withContext(Dispatchers.IO) {
+                DB.insert(exercise)
             }
+
+            val updatedExercise = exercise.copy(uid = insertedId)  // Create a new instance with updated uid
+
+            updateExerciseList(updatedExercise)  // Update the list of exercises on the background thread
+        }
+    }
+
+    private suspend fun updateExerciseList(updatedExercise: ExerciseData) {
+        withContext(Dispatchers.Main) {
+            adapter.add(updatedExercise)
+            adapter.notifyDataSetChanged()
         }
     }
 }
