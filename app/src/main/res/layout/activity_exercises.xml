@@ -1,24 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/fragmentContainer"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
     <ListView
         android:id="@+id/exerciseList"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:divider="@android:color/darker_gray"
-        android:dividerHeight="1dp" />
+        android:layout_height="match_parent"
+        android:visibility="visible" />
 
-    <Button
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/addButton"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end"
+        android:layout_height="180dp"
+        android:layout_gravity="end|bottom"
         android:layout_margin="16dp"
-        android:text="+"
+        android:contentDescription="+"
+        android:src=""
         android:textSize="24sp" />
 
-</LinearLayout>
+
+<!--    <androidx.fragment.app.FragmentContainerView-->
+<!--        android:id="@+id/viewExerciseFragment"-->
+<!--        android:name="com.msprg.exercisetracker.ViewExerciseFragment"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:visibility="gone" />-->
+
+</FrameLayout>

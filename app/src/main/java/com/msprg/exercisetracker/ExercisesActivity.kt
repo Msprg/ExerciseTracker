@@ -4,9 +4,9 @@ import AddExerciseDialogFragment
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.ArrayAdapter
-import android.widget.Button
 import android.widget.ListView
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -15,7 +15,7 @@ class ExercisesActivity : AppCompatActivity() {
 
     private lateinit var DB: ExerciseDAO
     private lateinit var exerciseList: ListView
-    private lateinit var addButton: Button
+    private lateinit var addButton: FloatingActionButton
     private lateinit var adapter: ArrayAdapter<ExerciseData>
 
 
@@ -44,8 +44,14 @@ class ExercisesActivity : AppCompatActivity() {
         exerciseList.adapter = adapter
 
         exerciseList.setOnItemClickListener { parent, view, position, id ->
-            val element = exercises[position] // Access the clicked item directly from the list
+            val ex = exercises[position] // Access the clicked item directly from the list
             // Handle the item click event
+            val fragment = ViewExerciseFragment.newInstance(ex.name, ex.description)
+
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, fragment)
+                .commit()
+
         }
 
         exerciseList.setOnItemLongClickListener { item, view, int, long ->
