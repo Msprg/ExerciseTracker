@@ -1,4 +1,4 @@
-package com.msprg.exercisetracker
+package com.msprg.exerciseTracker
 
 import org.junit.Test
 

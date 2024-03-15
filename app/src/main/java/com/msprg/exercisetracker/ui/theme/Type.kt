@@ -1,4 +1,4 @@
-package com.msprg.exercisetracker.ui.theme
+package com.msprg.exerciseTracker.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

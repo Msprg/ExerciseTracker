@@ -13,24 +13,7 @@
         android:theme="@style/Theme.ExerciseTracker"
         tools:targetApi="31">
         <activity
-            android:name=".HistoryActivity"
-            android:screenOrientation="sensorPortrait"
-            android:exported="false" />
-        <activity
-            android:name=".ScheduleActivity"
-            android:screenOrientation="sensorPortrait"
-            android:exported="false" />
-        <activity
-            android:name=".RoutinesActivity"
-            android:screenOrientation="sensorPortrait"
-            android:exported="false" />
-        <activity
-            android:name=".ExercisesActivity"
-            android:screenOrientation="sensorPortrait"
-            android:exported="false" />
-        <activity
             android:name=".MainActivity"
-            android:screenOrientation="sensorPortrait"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.ExerciseTracker">
