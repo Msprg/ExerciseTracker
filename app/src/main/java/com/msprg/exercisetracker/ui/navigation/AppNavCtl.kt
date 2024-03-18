@@ -24,7 +24,7 @@ import com.msprg.exerciseTracker.ui.screens.ScheduleScreen
 import com.msprg.exerciseTracker.ui.theme.ExerciseTrackerTheme
 
 @Composable
-fun AppNavCtl() {
+fun AppNavCtl(startingScreen: Screens = Screens.ExercisesScreen) {
     val navController = rememberNavController()
     Scaffold(
         bottomBar = {
@@ -32,7 +32,8 @@ fun AppNavCtl() {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = navBackStackEntry?.destination
                 NavItemsList.forEach { navItem ->
-                    NavigationBarItem(selected = currentDestination?.hierarchy?.any { it.route == navItem.route } == true,
+                    NavigationBarItem(
+                        selected = currentDestination?.hierarchy?.any { it.route == navItem.route } == true,
                         onClick = {
                             navController.navigate(navItem.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
@@ -46,7 +47,8 @@ fun AppNavCtl() {
                             if (currentDestination != null) {
                                 Icon(
 //                                    imageVector = navItem.selectedIcon,
-                                    imageVector = if (currentDestination.route == navItem.route) navItem.selectedIcon else navItem.unselectedIcon,
+                                    imageVector = if (currentDestination.route == navItem.route)
+                                        navItem.selectedIcon else navItem.unselectedIcon,
                                     contentDescription = null
                                 )
                             }
@@ -59,7 +61,7 @@ fun AppNavCtl() {
     ) { paddingValues ->
         NavHost(
             navController = navController,
-            startDestination = Screens.ExercisesScreen.name,
+            startDestination = startingScreen.name,
             modifier = Modifier
                 .padding(paddingValues)
         ) {

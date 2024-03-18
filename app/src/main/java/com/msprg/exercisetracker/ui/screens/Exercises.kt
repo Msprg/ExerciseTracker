@@ -25,6 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.msprg.exerciseTracker.ui.navigation.AppNavCtl
+import com.msprg.exerciseTracker.ui.navigation.Screens
 import com.msprg.exerciseTracker.ui.theme.ExerciseTrackerTheme
 
 @Composable
@@ -76,6 +78,6 @@ fun ExercisesScreen() {
 @Composable
 fun ExercisesScreenPrew() {
     ExerciseTrackerTheme {
-        ExercisesScreen()
+        AppNavCtl(Screens.ExercisesScreen)
     }
 }
