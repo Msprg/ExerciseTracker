@@ -1,12 +1,14 @@
 package com.msprg.exerciseTracker.ui.screens
 
 import android.content.res.Configuration
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FitnessCenter
@@ -51,16 +53,17 @@ fun ExercisesScreen() {
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.Start,
         ) {
-            Row {
-                Icon(
-                    imageVector = Icons.Default.FitnessCenter, contentDescription = null,
-                    modifier = Modifier.size(50.dp)
-                )
-                Column {
-                    Text(text = "ItemTitle", fontSize = 20.sp)
-                    Text(text = "ItemDescription", fontSize = 15.sp)
-                }
-            }
+//            Row {
+//                Icon(
+//                    imageVector = Icons.Default.FitnessCenter, contentDescription = null,
+//                    modifier = Modifier.size(50.dp)
+//                )
+//                Column {
+//                    Text(text = "ItemTitle", fontSize = 20.sp)
+//                    Text(text = "ItemDescription", fontSize = 15.sp)
+//                }
+//            }
+            ItemsList()
             Text(text = "EX_CONTENT $useless", fontSize = 32.sp)
         }
 //        Box(
@@ -71,6 +74,39 @@ fun ExercisesScreen() {
 //        ) {
 //            Text(text = "EX_CONTENT $useless", fontSize = 32.sp)
 //        }
+    }
+}
+
+@Composable
+fun AnItem(
+    modifier: Modifier = Modifier,
+    number: Int = 0,
+    title: String = "ItemTitle",
+    description: String = "ItemDescription"
+) {
+    Row(
+        modifier = Modifier.clickable { }
+    ) {
+        Icon(
+            imageVector = Icons.Default.FitnessCenter, contentDescription = null,
+            modifier = Modifier.size(55.dp)
+        )
+        Column(modifier = modifier.fillMaxSize()) {
+            Text(text = title + " " + number, fontSize = 20.sp)
+            Text(text = description, fontSize = 12.sp)
+        }
+    }
+}
+
+@Composable
+fun ItemsList(modifier: Modifier = Modifier) {
+    LazyColumn() {
+        items(50) { index ->
+            AnItem(
+                number = index,
+                title = "MOCK_ITEM_TITLE", description = "MOCK_ITEM_DESCRIPTION"
+            )
+        }
     }
 }
 
