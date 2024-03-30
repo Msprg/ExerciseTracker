@@ -1,5 +1,6 @@
 package com.msprg.exerciseTracker.ui.screens
 
+import android.content.Context
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,6 +21,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.datastore.dataStore
+import com.msprg.exerciseTracker.PersistUserdataSerializer
 import com.msprg.exerciseTracker.ui.components.RowItemsMockup
 import com.msprg.exerciseTracker.ui.navigation.AppNavCtl
 import com.msprg.exerciseTracker.ui.navigation.Screens
@@ -33,7 +36,10 @@ fun ExercisesScreen() {
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { useless++ },
+                onClick = {
+                    useless++
+                    dataStore("Userdata.json", PersistUserdataSerializer).
+                },
                 shape = CircleShape
             ) {
                 Icon(Icons.Rounded.Add, contentDescription = "Add")

@@ -1,5 +1,6 @@
 package com.msprg.exerciseTracker.ui.navigation
 
+import android.content.Context
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
@@ -11,17 +12,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.datastore.dataStore
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.msprg.exerciseTracker.PersistUserdataSerializer
 import com.msprg.exerciseTracker.ui.screens.ExercisesScreen
 import com.msprg.exerciseTracker.ui.screens.HistoryScreen
 import com.msprg.exerciseTracker.ui.screens.RoutinesScreen
 import com.msprg.exerciseTracker.ui.screens.ScheduleScreen
 import com.msprg.exerciseTracker.ui.theme.ExerciseTrackerTheme
+
+val Context.dataStore by dataStore("Userdata.json", PersistUserdataSerializer)
 
 @Composable
 fun AppNavCtl(startingScreen: Screens = Screens.ExercisesScreen) {
