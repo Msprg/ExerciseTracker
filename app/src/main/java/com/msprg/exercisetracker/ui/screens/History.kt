@@ -67,7 +67,7 @@ fun HistoryScreen() {
 @Composable
 fun HistoryScreenPrew() {
     ExerciseTrackerTheme {
-        AppNavCtl(Screens.HistoryScreen)
+//        AppNavCtl(Screens.HistoryScreen)
     }
 }
 

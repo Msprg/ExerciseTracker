@@ -49,6 +49,6 @@ fun RoutinesScreen() {
 @Composable
 fun RoutinesScreenPrew() {
     ExerciseTrackerTheme {
-        AppNavCtl(Screens.RoutinesScreen)
+//        AppNavCtl(Screens.RoutinesScreen)
     }
 }
