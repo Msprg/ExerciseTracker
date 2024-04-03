@@ -67,7 +67,15 @@ fun HistoryScreen() {
 @Composable
 fun HistoryScreenPrew() {
     ExerciseTrackerTheme {
-//        AppNavCtl(Screens.HistoryScreen)
+        AppNavCtl(Screens.HistoryScreen)
+    }
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun HistoryScreenPrewWireframe() {
+    ExerciseTrackerTheme {
+        AppNavCtl(Screens.HistoryScreen)
     }
 }
 

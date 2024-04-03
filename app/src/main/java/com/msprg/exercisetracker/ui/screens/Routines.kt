@@ -16,7 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.msprg.exerciseTracker.ui.components.RowItemsMockup
+import com.msprg.exerciseTracker.ui.components.RowItemsMockupWithButton
 import com.msprg.exerciseTracker.ui.navigation.AppNavCtl
 import com.msprg.exerciseTracker.ui.navigation.Screens
 import com.msprg.exerciseTracker.ui.theme.ExerciseTrackerTheme
@@ -40,7 +40,7 @@ fun RoutinesScreen() {
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.Start,
         ) {
-            RowItemsMockup(icon = Icons.Outlined.EventRepeat)
+            RowItemsMockupWithButton(icon = Icons.Outlined.EventRepeat)
         }
     }
 }
@@ -49,6 +49,6 @@ fun RoutinesScreen() {
 @Composable
 fun RoutinesScreenPrew() {
     ExerciseTrackerTheme {
-//        AppNavCtl(Screens.RoutinesScreen)
+        AppNavCtl(Screens.RoutinesScreen)
     }
 }

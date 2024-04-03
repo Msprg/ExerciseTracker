@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.jetbrainsSerializationPlugin)
+//    alias(libs.plugins.hiltPlugin)
+//    alias(libs.plugins.org.jetbrains.kotlin.kapt)
 }
 
 android {
@@ -48,6 +50,9 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+//    hilt {
+//        enableAggregatingTask = true
+//    }
 }
 
 dependencies {
@@ -65,6 +70,12 @@ dependencies {
     implementation(libs.androidx.datastore)
     implementation(libs.kotlinx.collections.immutable)
     implementation(libs.kotlinx.serialization.json)
+//    implementation(libs.hilt)
+//    implementation(libs.androidx.hilt.navigation.compose)
+//    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+//    implementation(libs.androidx.hilt.lifecycle.viewmodel)
+//    implementation(libs.org.jetbrains.kotlin.kapt.gradle.plugin)
+//    implementation(libs.hilt.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -72,4 +83,12 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+//    Kapt "com.google.dagger:hilt-compiler:2.44"
+//    kapt(libs.hilt.compiler)
+//    kapt(libs.hilt.android.compiler)
 }
+
+// Allow references to generated code
+//kapt {
+//    correctErrorTypes = true
+//}

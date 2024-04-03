@@ -49,6 +49,14 @@ fun ScheduleScreen() {
 @Composable
 fun ScheduleScreenPrew() {
     ExerciseTrackerTheme {
-//        AppNavCtl(Screens.ScheduleScreen)
+        AppNavCtl(Screens.ScheduleScreen)
+    }
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun ScheduleScreenPrewWireframe() {
+    ExerciseTrackerTheme {
+        AppNavCtl(Screens.ScheduleScreen)
     }
 }

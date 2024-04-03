@@ -14,6 +14,11 @@ datastore = "1.0.0"
 kotlinxCollectionsImmutable = "0.3.7"
 kotlinxSerializationJson = "1.6.3"
 serializationPlugin = "1.9.23"
+hilt = "2.51.1"
+#orgJetbrainsKotlinKaptGradlePlugin = "2.0.0-Beta5"
+#hiltNavigationCompose = "1.2.0"
+#hiltLifecycleViewmodel = "1.0.0-alpha03"
+#lifecycleViewmodelKtx = "2.7.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -35,9 +40,17 @@ androidx-material-icons-extended = { group = "androidx.compose.material", name =
 androidx-datastore = { group = "androidx.datastore", name = "datastore", version.ref = "datastore" }
 kotlinx-collections-immutable = { group = "org.jetbrains.kotlinx", name = "kotlinx-collections-immutable", version.ref = "kotlinxCollectionsImmutable" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+#hilt = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt"}
+#hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
+#hilt-android-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
+#androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+#androidx-hilt-lifecycle-viewmodel = { group = "androidx.hilt", name = "hilt-lifecycle-viewmodel", version.ref = "hiltLifecycleViewmodel" }
+#androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 jetbrainsSerializationPlugin = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "serializationPlugin" }
+#hiltPlugin = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+#org-jetbrains-kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 
