@@ -4,6 +4,9 @@ import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Base64
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -32,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.msprg.exerciseTracker.ExTrApplication
@@ -42,6 +46,14 @@ import com.msprg.exerciseTracker.ui.components.RowItem
 import com.msprg.exerciseTracker.ui.navigation.AppNavCtl
 import com.msprg.exerciseTracker.ui.navigation.Screens
 import com.msprg.exerciseTracker.ui.theme.ExerciseTrackerTheme
+import java.io.ByteArrayOutputStream
+
+fun encodeImageToBase64(bitmap: Bitmap): String {
+    val byteArrayOutputStream = ByteArrayOutputStream()
+    bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
+    val byteArray = byteArrayOutputStream.toByteArray()
+    return Base64.encodeToString(byteArray, Base64.DEFAULT)
+}
 
 fun decodeBase64ToImage(encodedString: String): Bitmap {
     val decodedBytes = Base64.decode(encodedString, Base64.DEFAULT)
@@ -59,17 +71,21 @@ fun ExercisesScreen(
 
     if (showAddDialog) {
         AddExerciseDialog(
-            onDismiss = { showAddDialog = false },
-            onSave = { title, description ->
-                // Handle saving the exercise item
-                // You can call a function in your ViewModel to save the data
-                viewModel.addExerciseItem(
-                    icon = ExerciseIcon.VectorIcon(),
-                    title, description
-                )
+            onDismiss = { showAddDialog = false }
+        ) { title: String, description: String, bitmap: Bitmap? ->
+            val icon = if (bitmap != null) {
+                val base64String = encodeImageToBase64(bitmap)
+                ExerciseIcon.RasterIcon(base64String)
+            } else {
+                ExerciseIcon.DefaultIcon
             }
-        )
+            viewModel.addExerciseItem(
+                icon = icon,
+                title, description
+            )
+        }
     }
+
 
     Scaffold(
         floatingActionButton = {
@@ -92,22 +108,11 @@ fun ExercisesScreen(
         ) {
             items(exerciseData.excList.size) { index ->
                 val exerciseItem = exerciseData.excList[index]
-//                exerciseData.excList.forEachIndexed { index, exerciseItem ->
                 when (val icon = exerciseItem.icon) {
-                    is ExerciseIcon.VectorIcon -> {
-                        val imageVector = when (icon.iconName) {
-                            "FitnessCenter" -> Icons.Default.FitnessCenter
-                            else -> Icons.Default.FitnessCenter
-                        }
+                    is ExerciseIcon.DefaultIcon -> {
                         RowItem(
                             icon = {
-                                Icon(
-                                    imageVector = imageVector,
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .size(55.dp)
-                                        .padding(start = 8.dp)
-                                )
+                                GetDefaultVectorIcon()
                             },
                             title = exerciseItem.exTitle,
                             description = exerciseItem.exDescription,
@@ -115,37 +120,38 @@ fun ExercisesScreen(
                                 viewModel.deleteExerciseItem(index)
                             }
                         )
-//
-//                        var fitnessCenterInstance = Icons.Default.Square
-//                        try {
-//                            val iconsClass = Icons::class.java
-//                            val filledField = iconsClass.getField("Filled")
-//                            val filledObject = filledField.get(null)
-//                            val fitnessCenterField = filledObject::class.java.getField("FitnessCenter")
-////                            val fitnessCenterInstance = fitnessCenterField.get(null) as ImageVector
-//                            fitnessCenterInstance = fitnessCenterField.get(null) as ImageVector
-//                            // Use the fitnessCenterInstance as needed
-//                        } catch (e: Exception) {
-//                            // Handle any exceptions that may occur during reflection
-//                            e.printStackTrace()
-//                        }
-
-//                        val imageVector = Icons.Filled::class.java.fields.firstOrNull {
-//                            it.name == icon.iconName
-//                        }?.get(null) as? ImageVector
-//                            ?: throw IllegalArgumentException("Unknown ImageVector: ${icon.iconName}")
                     }
 
                     is ExerciseIcon.RasterIcon -> {
-                        val bitmap = decodeBase64ToImage(icon.imageBase64)
+                        val bitmap = try {
+                            decodeBase64ToImage(icon.imageBase64)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            null
+                        }
+
                         RowItem(
-//                            icon = bitmap,
+                            icon = {
+                                if (bitmap != null) {
+                                    Image(
+                                        bitmap = bitmap.asImageBitmap(),
+                                        contentDescription = null,
+                                        modifier = Modifier
+                                            .size(55.dp)
+                                            .padding(start = 8.dp)
+                                    )
+                                } else {
+                                    GetDefaultVectorIcon()
+                                }
+                            },
                             title = exerciseItem.exTitle,
-                            description = exerciseItem.exDescription
+                            description = exerciseItem.exDescription,
+                            onLongClick = {
+                                viewModel.deleteExerciseItem(index)
+                            }
                         )
                     }
                 }
-//                }
             }
 //            exerciseData.ExcList.forEach {
 //                RowItem(
@@ -163,13 +169,34 @@ fun ExercisesScreen(
 }
 
 @Composable
+private fun GetDefaultVectorIcon() {
+    Icon(
+        imageVector = Icons.Default.FitnessCenter,
+        contentDescription = null,
+        modifier = Modifier
+            .size(55.dp)
+            .padding(start = 8.dp)
+    )
+}
+
+@Composable
 fun AddExerciseDialog(
     onDismiss: () -> Unit,
-    onSave: (String, String) -> Unit
+    onSave: (String, String, Bitmap?) -> Unit
 ) {
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
+    var selectedImage by remember { mutableStateOf<Bitmap?>(null) }
 
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri ->
+            uri?.let {
+                val inputStream = ExTrApplication.appContext.contentResolver.openInputStream(it)
+                selectedImage = BitmapFactory.decodeStream(inputStream)
+            }
+        }
+    )
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
@@ -191,14 +218,32 @@ fun AddExerciseDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(120.dp),
-                    maxLines = 5
+                    maxLines = 8
                 )
+                Spacer(modifier = Modifier.height(16.dp))
+                TextButton(
+                    onClick = {
+                        launcher.launch("image/*")
+                    }
+                )
+                {
+                    Text("Pick Image")
+                }
+                selectedImage?.let {
+                    Image(
+                        bitmap = it.asImageBitmap(),
+                        contentDescription = "Selected Image",
+                        modifier = Modifier
+                            .size(100.dp)
+                            .padding(top = 8.dp)
+                    )
+                }
             }
         },
         confirmButton = {
             TextButton(
                 onClick = {
-                    onSave(title, description)
+                    onSave(title, description, selectedImage)
                     onDismiss()
                 }
             ) {

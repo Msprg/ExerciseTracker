@@ -15,7 +15,7 @@ data class ExercisesList(
 
 @Serializable
 data class ExerciseItem(
-    val icon: ExerciseIcon = ExerciseIcon.VectorIcon(),
+    val icon: ExerciseIcon = ExerciseIcon.DefaultIcon,
     val exTitle: String = "UNSPECIFIEDtit",
     val exDescription: String = "UNSPECIFIEDdesc"
 )
@@ -43,7 +43,7 @@ data class ExerciseItem(
 @Serializable
 sealed class ExerciseIcon {
     @Serializable
-    data class VectorIcon(val iconName: String = "FitnessCenter") : ExerciseIcon()
+    object DefaultIcon : ExerciseIcon()
 
     @Serializable
     data class RasterIcon(val imageBase64: String) : ExerciseIcon()
@@ -58,9 +58,10 @@ sealed class ExerciseIcon {
 
 val ExerciseIconModule = SerializersModule {
     polymorphic(ExerciseIcon::class) {
-        subclass(ExerciseIcon.VectorIcon::class, ExerciseIcon.VectorIcon.serializer())
+        subclass(ExerciseIcon.DefaultIcon::class, ExerciseIcon.DefaultIcon.serializer())
         subclass(ExerciseIcon.RasterIcon::class, ExerciseIcon.RasterIcon.serializer())
     }
 }
+
 
 //val json = Json { serializersModule = ExerciseIconModule }
