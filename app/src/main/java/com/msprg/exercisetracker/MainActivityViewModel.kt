@@ -1,10 +1,11 @@
-package com.msprg.exerciseTracker.di
+package com.msprg.exerciseTracker
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.msprg.exerciseTracker.data.ExerciseIcon
 import com.msprg.exerciseTracker.data.ExerciseItem
 import com.msprg.exerciseTracker.data.ExercisesList
+import com.msprg.exerciseTracker.di.IFDataStoreModule
 import kotlinx.collections.immutable.mutate
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch

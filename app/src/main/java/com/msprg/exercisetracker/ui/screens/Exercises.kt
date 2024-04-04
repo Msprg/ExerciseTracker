@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FitnessCenter
@@ -33,9 +35,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.msprg.exerciseTracker.ExTrApplication
+import com.msprg.exerciseTracker.MainActivityViewModel
 import com.msprg.exerciseTracker.data.ExerciseIcon
 import com.msprg.exerciseTracker.data.ExercisesList
-import com.msprg.exerciseTracker.di.MainActivityViewModel
 import com.msprg.exerciseTracker.ui.components.RowItem
 import com.msprg.exerciseTracker.ui.navigation.AppNavCtl
 import com.msprg.exerciseTracker.ui.navigation.Screens
@@ -81,14 +83,16 @@ fun ExercisesScreen(
             }
         }
     ) { innerPadding ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize(),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.Start
         ) {
-            exerciseData.excList.forEachIndexed { index, exerciseItem ->
+            items(exerciseData.excList.size) { index ->
+                val exerciseItem = exerciseData.excList[index]
+//                exerciseData.excList.forEachIndexed { index, exerciseItem ->
                 when (val icon = exerciseItem.icon) {
                     is ExerciseIcon.VectorIcon -> {
                         val imageVector = when (icon.iconName) {
@@ -96,7 +100,15 @@ fun ExercisesScreen(
                             else -> Icons.Default.FitnessCenter
                         }
                         RowItem(
-                            icon = imageVector,
+                            icon = {
+                                Icon(
+                                    imageVector = imageVector,
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(55.dp)
+                                        .padding(start = 8.dp)
+                                )
+                            },
                             title = exerciseItem.exTitle,
                             description = exerciseItem.exDescription,
                             onLongClick = {
@@ -133,6 +145,7 @@ fun ExercisesScreen(
                         )
                     }
                 }
+//                }
             }
 //            exerciseData.ExcList.forEach {
 //                RowItem(
@@ -207,24 +220,3 @@ fun ExercisesScreenPrew() {
         AppNavCtl(Screens.ExercisesScreen)
     }
 }
-
-
-//
-//@Preview(showBackground = true)
-//@Composable
-//fun ExercisesScreenPreview() {
-//    ExerciseTrackerTheme {
-//        ExercisesScreen()
-//    }
-//}
-//
-//@Preview(showBackground = true)
-//@Composable
-//fun ExercisesScreenPreviewWithHilt() {
-//    ExerciseTrackerTheme {
-//        HiltPreviewActivity().setContent {
-//            ExercisesScreen()
-//        }
-//    }
-//}
-
