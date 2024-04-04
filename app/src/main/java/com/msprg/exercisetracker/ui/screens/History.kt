@@ -5,10 +5,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDatePickerState
@@ -56,7 +58,17 @@ fun HistoryScreen() {
                     verticalArrangement = Arrangement.Top,
                     horizontalAlignment = Alignment.Start,
                 ) {
-                    RowItemsMockup(icon = Icons.Outlined.History)
+                    RowItemsMockup(
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Outlined.History,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(55.dp)
+                                    .padding(start = 8.dp)
+                            )
+                        }
+                    )
                 }
             }
         }

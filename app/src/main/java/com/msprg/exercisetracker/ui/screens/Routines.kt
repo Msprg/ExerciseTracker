@@ -5,18 +5,23 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.EventRepeat
 import androidx.compose.material.icons.rounded.Verified
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import com.msprg.exerciseTracker.ui.components.RowItemsMockupWithButton
+import androidx.compose.ui.unit.dp
+import com.msprg.exerciseTracker.ui.components.RowItemsMockup
 import com.msprg.exerciseTracker.ui.navigation.AppNavCtl
 import com.msprg.exerciseTracker.ui.navigation.Screens
 import com.msprg.exerciseTracker.ui.theme.ExerciseTrackerTheme
@@ -40,7 +45,30 @@ fun RoutinesScreen() {
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.Start,
         ) {
-            RowItemsMockupWithButton(icon = Icons.Outlined.EventRepeat)
+//            RowItemsMockupWithButton(icon = Icons.Outlined.EventRepeat)
+            RowItemsMockup(icon = {
+                Icon(
+                    imageVector = Icons.Outlined.EventRepeat,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(55.dp)
+                        .padding(start = 8.dp)
+                )
+            },
+                trailingContent = {
+                    IconButton(
+                        onClick = {},
+                        modifier = Modifier.padding(end = 8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.PlayArrow,
+                            tint = Color.Green,
+                            contentDescription = null,
+                            modifier = Modifier.size(55.dp)
+                        )
+                    }
+                }
+            )
         }
     }
 }
