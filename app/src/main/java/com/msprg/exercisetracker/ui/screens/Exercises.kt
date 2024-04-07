@@ -7,7 +7,11 @@ import android.util.Base64
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -41,9 +45,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import com.msprg.exerciseTracker.ExTrApplication
 import com.msprg.exerciseTracker.MainActivityViewModel
@@ -278,6 +285,17 @@ fun ExerciseItemViewScreen(
     exerciseItem: ExerciseItem,
     onBackPressed: () -> Unit
 ) {
+    var showFullscreenImage by remember { mutableStateOf(false) }
+    var fullscreenBitmap by remember { mutableStateOf<Bitmap?>(null) }
+
+    if (showFullscreenImage && fullscreenBitmap != null) {
+        ShowImage(
+            showFullscreenImage = showFullscreenImage,
+            fullscreenBitmap = fullscreenBitmap,
+            onDismiss = { showFullscreenImage = false }
+        )
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -323,6 +341,10 @@ fun ExerciseItemViewScreen(
                                 .size(200.dp)
                                 .align(Alignment.CenterHorizontally)
                                 .padding(top = 16.dp)
+                                .clickable {
+                                    fullscreenBitmap = bitmap
+                                    showFullscreenImage = true
+                                }
                         )
                     } else {
                         Icon(
@@ -345,6 +367,43 @@ fun ExerciseItemViewScreen(
         }
     }
 }
+
+@Composable
+private fun ShowImage(
+    showFullscreenImage: Boolean,
+    fullscreenBitmap: Bitmap?,
+    onDismiss: () -> Unit
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = onDismiss
+                )
+        ) {
+            Image(
+                bitmap = fullscreenBitmap!!.asImageBitmap(),
+                contentDescription = null,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) {
+                        // Do nothing when clicking on the image
+                    }
+            )
+        }
+    }
+}
+
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
