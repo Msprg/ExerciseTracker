@@ -8,15 +8,22 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.msprg.exerciseTracker.ExTrApplication
+import com.msprg.exerciseTracker.MainActivityViewModel
+import com.msprg.exerciseTracker.data.ExercisesList
+import com.msprg.exerciseTracker.ui.screens.ExerciseItemViewScreen
 import com.msprg.exerciseTracker.ui.screens.ExercisesScreen
 import com.msprg.exerciseTracker.ui.screens.HistoryScreen
 import com.msprg.exerciseTracker.ui.screens.RoutinesScreen
@@ -24,8 +31,14 @@ import com.msprg.exerciseTracker.ui.screens.ScheduleScreen
 import com.msprg.exerciseTracker.ui.theme.ExerciseTrackerTheme
 
 @Composable
-fun AppNavCtl(startingScreen: Screens = Screens.ExercisesScreen) {
+fun AppNavCtl(
+    startingScreen: Screens = Screens.ExercisesScreen,
+    viewModel: MainActivityViewModel = MainActivityViewModel(ExTrApplication.datastoremodule)
+) {
     val navController = rememberNavController()
+    val exerciseData by viewModel.exerciseDataFlow.collectAsState(initial = ExercisesList())
+    ExTrApplication
+
     Scaffold(
         bottomBar = {
             NavigationBar {
@@ -66,7 +79,25 @@ fun AppNavCtl(startingScreen: Screens = Screens.ExercisesScreen) {
                 .padding(paddingValues)
         ) {
             composable(route = Screens.ExercisesScreen.name) {
-                ExercisesScreen()
+                ExercisesScreen(
+//                    viewModel,
+                    navCtl = navController
+                )
+            }
+            composable(
+                route = "${Screens.ExerciseItemViewScreen.name}/{exerciseItemIndex}",
+                arguments = listOf(navArgument("exerciseItemIndex") { type = NavType.IntType })
+            ) {
+                val exerciseItemIndex = it.arguments?.getInt("exerciseItemIndex") ?: 0
+//                val exerciseData by viewModel.exerciseDataFlow.collectAsState(initial = ExercisesList())
+//                val exerciseData = ExTrApplication.datastoremodule.protoDS.data.collectAsState(initial = ExercisesList())
+//                val exerciseItem = exerciseData.value.excList[exerciseItemIndex] //java.lang.IndexOutOfBoundsException: index: 0, size: 0
+                val exerciseItem =
+                    exerciseData.excList[exerciseItemIndex] //java.lang.IndexOutOfBoundsException: index: 0, size: 0
+                ExerciseItemViewScreen(
+                    exerciseItem = exerciseItem,
+                    onBackPressed = { navController.popBackStack() }
+                )
             }
             composable(route = Screens.RoutinesScreen.name) {
                 RoutinesScreen()

@@ -16,17 +16,23 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -38,9 +44,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.msprg.exerciseTracker.ExTrApplication
 import com.msprg.exerciseTracker.MainActivityViewModel
 import com.msprg.exerciseTracker.data.ExerciseIcon
+import com.msprg.exerciseTracker.data.ExerciseItem
 import com.msprg.exerciseTracker.data.ExercisesList
 import com.msprg.exerciseTracker.ui.components.RowItem
 import com.msprg.exerciseTracker.ui.navigation.AppNavCtl
@@ -60,10 +68,12 @@ fun decodeBase64ToImage(encodedString: String): Bitmap {
     return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
 }
 
-
 @Composable
 fun ExercisesScreen(
-    viewModel: MainActivityViewModel = MainActivityViewModel(ExTrApplication.datastoremodule)
+    viewModel: MainActivityViewModel = MainActivityViewModel(ExTrApplication.datastoremodule),
+//    exerciseData: ExercisesList,
+//    viewModel: MainActivityViewModel,
+    navCtl: NavController
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
     val exerciseData by viewModel.exerciseDataFlow.collectAsState(initial = ExercisesList())
@@ -85,8 +95,6 @@ fun ExercisesScreen(
             )
         }
     }
-
-
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
@@ -116,6 +124,9 @@ fun ExercisesScreen(
                             },
                             title = exerciseItem.exTitle,
                             description = exerciseItem.exDescription,
+                            onClick = {
+                                navCtl.navigate("${Screens.ExerciseItemViewScreen.name}/$index")
+                            },
                             onLongClick = {
                                 viewModel.deleteExerciseItem(index)
                             }
@@ -146,6 +157,9 @@ fun ExercisesScreen(
                             },
                             title = exerciseItem.exTitle,
                             description = exerciseItem.exDescription,
+                            onClick = {
+                                navCtl.navigate("${Screens.ExerciseItemViewScreen.name}/$index")
+                            },
                             onLongClick = {
                                 viewModel.deleteExerciseItem(index)
                             }
@@ -256,6 +270,80 @@ fun AddExerciseDialog(
             }
         }
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ExerciseItemViewScreen(
+    exerciseItem: ExerciseItem,
+    onBackPressed: () -> Unit
+) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(text = exerciseItem.exTitle) },
+                navigationIcon = {
+                    IconButton(onClick = onBackPressed) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                }
+            )
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .verticalScroll(rememberScrollState())
+        ) {
+            when (val icon = exerciseItem.icon) {
+                is ExerciseIcon.DefaultIcon -> {
+                    Icon(
+                        imageVector = Icons.Default.FitnessCenter,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(200.dp)
+                            .align(Alignment.CenterHorizontally)
+                            .padding(top = 16.dp)
+                    )
+                }
+
+                is ExerciseIcon.RasterIcon -> {
+                    val bitmap = try {
+                        decodeBase64ToImage(icon.imageBase64)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        null
+                    }
+                    if (bitmap != null) {
+                        Image(
+                            bitmap = bitmap.asImageBitmap(),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(200.dp)
+                                .align(Alignment.CenterHorizontally)
+                                .padding(top = 16.dp)
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.FitnessCenter,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(200.dp)
+                                .align(Alignment.CenterHorizontally)
+                                .padding(top = 16.dp)
+                        )
+                    }
+                }
+            }
+            Text(
+                text = exerciseItem.exDescription,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            )
+        }
+    }
 }
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
