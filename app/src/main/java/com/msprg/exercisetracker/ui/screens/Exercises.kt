@@ -47,6 +47,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -121,56 +122,41 @@ fun ExercisesScreen(
         ) {
             items(exerciseData.excList.size) { index ->
                 val exerciseItem = exerciseData.excList[index]
-                when (val icon = exerciseItem.icon) {
-                    is ExerciseIcon.DefaultIcon -> {
-                        RowItem(
-                            icon = {
+                val image: (@Composable () -> Unit) = {
+                    when (val icon = exerciseItem.icon) {
+                        is ExerciseIcon.DefaultIcon -> GetDefaultVectorIcon()
+                        is ExerciseIcon.RasterIcon -> {
+                            val bitmap = try {
+                                decodeBase64ToImage(icon.imageBase64)
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                                null
+                            }
+                            if (bitmap != null) {
+                                Image(
+                                    bitmap = bitmap.asImageBitmap(),
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(55.dp)
+                                        .padding(start = 8.dp)
+                                )
+                            } else {
                                 GetDefaultVectorIcon()
-                            },
-                            title = exerciseItem.exTitle,
-                            description = exerciseItem.exDescription,
-                            onClick = {
-                                navCtl.navigate("${Screens.ExerciseItemViewScreen.name}/$index")
-                            },
-                            onLongClick = {
-                                viewModel.deleteExerciseItem(index)
                             }
-                        )
-                    }
-
-                    is ExerciseIcon.RasterIcon -> {
-                        val bitmap = try {
-                            decodeBase64ToImage(icon.imageBase64)
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            null
                         }
-
-                        RowItem(
-                            icon = {
-                                if (bitmap != null) {
-                                    Image(
-                                        bitmap = bitmap.asImageBitmap(),
-                                        contentDescription = null,
-                                        modifier = Modifier
-                                            .size(55.dp)
-                                            .padding(start = 8.dp)
-                                    )
-                                } else {
-                                    GetDefaultVectorIcon()
-                                }
-                            },
-                            title = exerciseItem.exTitle,
-                            description = exerciseItem.exDescription,
-                            onClick = {
-                                navCtl.navigate("${Screens.ExerciseItemViewScreen.name}/$index")
-                            },
-                            onLongClick = {
-                                viewModel.deleteExerciseItem(index)
-                            }
-                        )
                     }
                 }
+                RowItem(
+                    icon = image,
+                    title = exerciseItem.exTitle,
+                    description = exerciseItem.exDescription,
+                    onClick = {
+                        navCtl.navigate("${Screens.ExerciseItemViewScreen.name}/$index")
+                    },
+                    onLongClick = {
+                        viewModel.deleteExerciseItem(index)
+                    }
+                )
             }
         }
     }
