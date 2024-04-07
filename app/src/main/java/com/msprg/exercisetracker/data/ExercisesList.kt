@@ -20,26 +20,6 @@ data class ExerciseItem(
     val exDescription: String = "UNSPECIFIEDdesc"
 )
 
-//sealed class ExerciseIcon {
-//    //    @Serializable(with = ImageVectorSerializer::class)
-////    data class VectorIcon(val imageVector: ImageVector = Icons.Default.FitnessCenter) : ExerciseIcon()
-//    @Serializable
-//    data class VectorIcon(val iconName: String = "FitnessCenter") : ExerciseIcon()
-//
-//    @Serializable
-//    data class RasterIcon(val imageBase64: String) : ExerciseIcon()
-//}
-
-//@Serializable(with = ExerciseIconSerializer::class)
-//sealed class ExerciseIcon {
-//    @Serializable
-//    data class VectorIcon(val iconName: String = "FitnessCenter") : ExerciseIcon()
-//
-//    @Serializable
-//    data class RasterIcon(val imageBase64: String) : ExerciseIcon()
-//}
-
-
 @Serializable
 sealed class ExerciseIcon {
     @Serializable
@@ -49,12 +29,6 @@ sealed class ExerciseIcon {
     data class RasterIcon(val imageBase64: String) : ExerciseIcon()
 }
 
-//@Serializable
-//data class ExerciseItem(
-//    val icon: ExerciseIcon = ExerciseIcon.VectorIcon(),
-//    val exTitle: String = "UNSPECIFIEDtit",
-//    val exDescription: String = "UNSPECIFIEDdesc"
-//)
 
 val ExerciseIconModule = SerializersModule {
     polymorphic(ExerciseIcon::class) {

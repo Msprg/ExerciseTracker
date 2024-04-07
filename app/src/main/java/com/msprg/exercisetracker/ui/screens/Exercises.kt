@@ -78,8 +78,6 @@ fun decodeBase64ToImage(encodedString: String): Bitmap {
 @Composable
 fun ExercisesScreen(
     viewModel: MainActivityViewModel = MainActivityViewModel(ExTrApplication.datastoremodule),
-//    exerciseData: ExercisesList,
-//    viewModel: MainActivityViewModel,
     navCtl: NavController
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
@@ -174,17 +172,6 @@ fun ExercisesScreen(
                     }
                 }
             }
-//            exerciseData.ExcList.forEach {
-//                RowItem(
-////                    icon = it.icon. ,
-//                    title = it.exTitle,
-//                    description = it.exDescription
-//                )
-//            }
-//            RowItemsMockup(icon = Icons.Default.FitnessCenter,
-//                title = exerciseData.exTitle,
-//                description = exerciseData.exDescription
-//			)
         }
     }
 }

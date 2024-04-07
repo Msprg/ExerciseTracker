@@ -59,7 +59,6 @@ fun AppNavCtl(
                         icon = {
                             if (currentDestination != null) {
                                 Icon(
-//                                    imageVector = navItem.selectedIcon,
                                     imageVector = if (currentDestination.route == navItem.route)
                                         navItem.selectedIcon else navItem.unselectedIcon,
                                     contentDescription = null
@@ -80,7 +79,6 @@ fun AppNavCtl(
         ) {
             composable(route = Screens.ExercisesScreen.name) {
                 ExercisesScreen(
-//                    viewModel,
                     navCtl = navController
                 )
             }
@@ -89,9 +87,6 @@ fun AppNavCtl(
                 arguments = listOf(navArgument("exerciseItemIndex") { type = NavType.IntType })
             ) {
                 val exerciseItemIndex = it.arguments?.getInt("exerciseItemIndex") ?: 0
-//                val exerciseData by viewModel.exerciseDataFlow.collectAsState(initial = ExercisesList())
-//                val exerciseData = ExTrApplication.datastoremodule.protoDS.data.collectAsState(initial = ExercisesList())
-//                val exerciseItem = exerciseData.value.excList[exerciseItemIndex] //java.lang.IndexOutOfBoundsException: index: 0, size: 0
                 val exerciseItem =
                     exerciseData.excList[exerciseItemIndex] //java.lang.IndexOutOfBoundsException: index: 0, size: 0
                 ExerciseItemViewScreen(

@@ -47,13 +47,6 @@ fun RowItem(
             .combinedClickable(onClick = onClick, onLongClick = onLongClick),
         verticalAlignment = Alignment.CenterVertically
     ) {
-//        Icon(
-//            imageVector = icon,
-//            contentDescription = null,
-//            modifier = Modifier
-//                .size(55.dp)
-//                .padding(start = 16.dp)
-//        )
         icon?.invoke()
         Column(
             modifier = Modifier
@@ -73,37 +66,6 @@ fun RowItem(
         trailingContent?.invoke()
     }
 }
-
-//@Composable
-//fun RowItemWithButton(
-//    modifier: Modifier = Modifier,
-//    icon: ImageVector = Icons.Outlined.Square,
-//    title: String = "RowItemTitle",
-//    description: String = "RowItemDescription",
-//    onClick: () -> Unit = {},
-//    onButtonClick: () -> Unit = {}
-//) {
-//    RowItem(
-//        modifier = modifier,
-//        icon = icon,
-//        title = title,
-//        description = description,
-//        onClick = onClick,
-//        trailingContent = {
-//            IconButton(
-//                onClick = onButtonClick,
-//                modifier = Modifier.padding(end = 16.dp)
-//            ) {
-//                Icon(
-//                    imageVector = Icons.Filled.PlayArrow,
-//                    tint = Color.Green,
-//                    contentDescription = null,
-//                    modifier = Modifier.size(55.dp)
-//                )
-//            }
-//        }
-//    )
-//}
 
 @Composable
 fun RowItemsMockup(
@@ -136,22 +98,3 @@ fun RowItemsMockup(
         }
     }
 }
-
-//@Composable
-//fun RowItemsMockupWithButton(
-//    modifier: Modifier = Modifier,
-//    howMany: Int = 50,
-//    icon: ImageVector = Icons.Outlined.Square,
-//    title: String = "MOCK_ITEM_TITLE",
-//    description: String = "MOCK_ITEM_DESCRIPTION"
-//) {
-//    LazyColumn(modifier = modifier) {
-//        items(howMany) { index ->
-//            RowItemWithButton(
-//                icon = icon,
-//                title = "$title $index",
-//                description = "$description $index"
-//            )
-//        }
-//    }
-//}
