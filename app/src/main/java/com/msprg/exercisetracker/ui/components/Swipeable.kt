@@ -85,7 +85,6 @@ fun DeleteBackground(
     val color = if (swipeDismissState.dismissDirection == DismissDirection.EndToStart) {
         Color.Red
     } else Color.Transparent
-
     Box(
         modifier = Modifier
             .fillMaxSize()

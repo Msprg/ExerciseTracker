@@ -1,6 +1,7 @@
 package com.msprg.exerciseTracker.ui.components
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Square
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -25,7 +27,6 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun RowItem(
     modifier: Modifier = Modifier,
-//    icon: ImageVector = Icons.Outlined.Square,
     icon: (@Composable () -> Unit)? = {
         Icon(
             imageVector = Icons.Outlined.Square,
@@ -39,31 +40,38 @@ fun RowItem(
     description: String = "RowItemDescription",
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
+    onDelete: () -> Unit = {},
     trailingContent: (@Composable () -> Unit)? = null
 ) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .combinedClickable(onClick = onClick, onLongClick = onLongClick),
-        verticalAlignment = Alignment.CenterVertically
+    SwipeToDeleteContainer(
+        item = Unit,
+        onDelete = { onDelete() }
     ) {
-        icon?.invoke()
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .padding(start = 8.dp)
-                .fillMaxHeight()
-                .heightIn(min = 80.dp)
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.background)
+                .combinedClickable(onClick = onClick, onLongClick = onLongClick),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = title, fontSize = 20.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(
-                text = description,
-                fontSize = 12.sp,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
+            icon?.invoke()
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 8.dp)
+                    .fillMaxHeight()
+                    .heightIn(min = 80.dp)
+            ) {
+                Text(text = title, fontSize = 20.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(
+                    text = description,
+                    fontSize = 12.sp,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            trailingContent?.invoke()
         }
-        trailingContent?.invoke()
     }
 }
 
@@ -98,3 +106,4 @@ fun RowItemsMockup(
         }
     }
 }
+

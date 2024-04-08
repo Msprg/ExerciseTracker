@@ -146,17 +146,30 @@ fun ExercisesScreen(
                         }
                     }
                 }
+//                SwipeToDeleteContainer(
+//                    item = exerciseItem, onDelete = {
+//                        viewModel.deleteExerciseItem(
+//                            index
+//                        )
+//                    }
+//                ) {
                 RowItem(
                     icon = image,
+//                        title = it.exTitle,
                     title = exerciseItem.exTitle,
+//                        description = it.exDescription,
                     description = exerciseItem.exDescription,
                     onClick = {
                         navCtl.navigate("${Screens.ExerciseItemViewScreen.name}/$index")
                     },
                     onLongClick = {
+//                            viewModel.deleteExerciseItem(index)
+                    },
+                    onDelete = {
                         viewModel.deleteExerciseItem(index)
                     }
                 )
+//                }
             }
         }
     }
@@ -272,7 +285,13 @@ fun ExerciseItemViewScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = exerciseItem.exTitle) },
+                title = {
+                    Text(
+                        text = exerciseItem.exTitle,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
