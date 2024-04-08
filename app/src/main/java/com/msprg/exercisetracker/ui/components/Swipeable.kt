@@ -34,17 +34,15 @@ import kotlinx.coroutines.delay
 @Composable
 fun <T> SwipeToDeleteContainer(
     item: T,
-    onDelete: (T) -> Unit,
+    DismissToStartAction: (T) -> Unit,
     animationDuration: Int = 500,
     content: @Composable (T) -> Unit
 ) {
-    var isRemoved by remember {
-        mutableStateOf(false)
-    }
+    var isDismissedToStart by remember { mutableStateOf(false) }
     val state = rememberDismissState(
         confirmValueChange = { value ->
             if (value == DismissValue.DismissedToStart) {
-                isRemoved = true
+                isDismissedToStart = true
                 true
             } else {
                 false
@@ -52,14 +50,14 @@ fun <T> SwipeToDeleteContainer(
         }
     )
 
-    LaunchedEffect(key1 = isRemoved) {
-        if (isRemoved) {
+    LaunchedEffect(key1 = isDismissedToStart) {
+        if (isDismissedToStart) {
             delay(animationDuration.toLong())
-            onDelete(item)
+            DismissToStartAction(item)
         }
     }
     AnimatedVisibility(
-        visible = !isRemoved,
+        visible = !isDismissedToStart,
         exit = shrinkVertically(
             animationSpec = tween(durationMillis = animationDuration),
             shrinkTowards = Alignment.Top
@@ -68,7 +66,7 @@ fun <T> SwipeToDeleteContainer(
         SwipeToDismiss(
             state = state,
             background = {
-                DeleteBackground(swipeDismissState = state)
+                DismissBackground(swipeDismissState = state)
             },
             dismissContent = { content(item) },
             directions = setOf(DismissDirection.EndToStart)
@@ -78,7 +76,7 @@ fun <T> SwipeToDeleteContainer(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DeleteBackground(
+fun DismissBackground(
     swipeDismissState: DismissState
 ) {
     val color = if (swipeDismissState.dismissDirection == DismissDirection.EndToStart) {

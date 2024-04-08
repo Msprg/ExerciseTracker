@@ -40,12 +40,12 @@ fun RowItem(
     description: String = "RowItemDescription",
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
-    onDelete: () -> Unit = {},
+    onDismissToStart: () -> Unit = {},
     trailingContent: (@Composable () -> Unit)? = null
 ) {
     SwipeToDeleteContainer(
         item = Unit,
-        onDelete = { onDelete() }
+        DismissToStartAction = { onDismissToStart() }
     ) {
         Row(
             modifier = modifier
