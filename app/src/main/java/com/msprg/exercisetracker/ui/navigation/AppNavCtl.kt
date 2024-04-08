@@ -1,6 +1,7 @@
 package com.msprg.exerciseTracker.ui.navigation
 
 import android.content.res.Configuration
+import android.widget.Toast
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -83,16 +84,27 @@ fun AppNavCtl(
                 )
             }
             composable(
-                route = "${Screens.ExerciseItemViewScreen.name}/{exerciseItemIndex}",
-                arguments = listOf(navArgument("exerciseItemIndex") { type = NavType.IntType })
-            ) {
-                val exerciseItemIndex = it.arguments?.getInt("exerciseItemIndex") ?: 0
-                val exerciseItem =
-                    exerciseData.excList[exerciseItemIndex] //java.lang.IndexOutOfBoundsException: index: 0, size: 0
-                ExerciseItemViewScreen(
-                    exerciseItem = exerciseItem,
-                    onBackPressed = { navController.popBackStack() }
-                )
+                route = "${Screens.ExerciseItemViewScreen.name}/{exerciseItemUUID}",
+                arguments = listOf(navArgument("exerciseItemUUID") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val exerciseItemUUID = backStackEntry.arguments?.getString("exerciseItemUUID") ?: ""
+                val exerciseItem = exerciseData.excList.find { it.id == exerciseItemUUID }
+                if (exerciseItem != null) {
+                    ExerciseItemViewScreen(
+                        exerciseItem = exerciseItem,
+                        onBackPressed = { navController.popBackStack() }
+                    )
+                } else {
+                    // Display a toast with an error message
+                    Toast.makeText(
+                        ExTrApplication.appContext,
+                        "No such item found :(",
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                    // Navigate back to the previous screen
+                    navController.popBackStack()
+                }
             }
             composable(route = Screens.RoutinesScreen.name) {
                 RoutinesScreen()
@@ -104,6 +116,7 @@ fun AppNavCtl(
                 HistoryScreen()
             }
         }
+
     }
 }
 

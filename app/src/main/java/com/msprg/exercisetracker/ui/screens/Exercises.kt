@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -120,8 +121,8 @@ fun ExercisesScreen(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.Start
         ) {
-            items(exerciseData.excList.size) { index ->
-                val exerciseItem = exerciseData.excList[index]
+            items(exerciseData.excList, key = { it.id }) { exerciseItem ->
+//                val exerciseItem = exerciseData.excList[index]
                 val image: (@Composable () -> Unit) = {
                     when (val icon = exerciseItem.icon) {
                         is ExerciseIcon.DefaultIcon -> GetDefaultVectorIcon()
@@ -158,15 +159,15 @@ fun ExercisesScreen(
 //                        title = it.exTitle,
                     title = exerciseItem.exTitle,
 //                        description = it.exDescription,
-                    description = exerciseItem.exDescription,
+                    description = "${exerciseItem.id} ${exerciseItem.exDescription}",
                     onClick = {
-                        navCtl.navigate("${Screens.ExerciseItemViewScreen.name}/$index")
+                        navCtl.navigate("${Screens.ExerciseItemViewScreen.name}/${exerciseItem.id}")
                     },
                     onLongClick = {
 //                            viewModel.deleteExerciseItem(index)
                     },
                     onDelete = {
-                        viewModel.deleteExerciseItem(index)
+                        viewModel.deleteExerciseItem(exerciseItem.id)
                     }
                 )
 //                }

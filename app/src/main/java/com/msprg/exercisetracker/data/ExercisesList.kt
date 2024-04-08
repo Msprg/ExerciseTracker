@@ -5,6 +5,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
+import java.util.UUID
 
 
 @Serializable
@@ -15,9 +16,10 @@ data class ExercisesList(
 
 @Serializable
 data class ExerciseItem(
+    val id: String = UUID.randomUUID().toString(),
     val icon: ExerciseIcon = ExerciseIcon.DefaultIcon,
-    val exTitle: String = "UNSPECIFIEDtit",
-    val exDescription: String = "UNSPECIFIEDdesc"
+    val exTitle: String = "",
+    val exDescription: String = ""
 )
 
 @Serializable

@@ -58,7 +58,6 @@ fun <T> SwipeToDeleteContainer(
             onDelete(item)
         }
     }
-
     AnimatedVisibility(
         visible = !isRemoved,
         exit = shrinkVertically(

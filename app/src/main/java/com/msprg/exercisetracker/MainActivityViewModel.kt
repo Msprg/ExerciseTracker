@@ -7,6 +7,7 @@ import com.msprg.exerciseTracker.data.ExerciseItem
 import com.msprg.exerciseTracker.data.ExercisesList
 import com.msprg.exerciseTracker.di.IFDataStoreModule
 import kotlinx.collections.immutable.mutate
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
@@ -36,13 +37,11 @@ class MainActivityViewModel(
         }
     }
 
-    fun deleteExerciseItem(index: Int) {
+    fun deleteExerciseItem(itemId: String) {
         viewModelScope.launch {
             dsModule.protoDS.updateData { it ->
                 it.copy(
-                    excList = it.excList.mutate {
-                        it.removeAt(index)
-                    }
+                    excList = it.excList.filterNot { it.id == itemId }.toPersistentList()
                 )
             }
         }
