@@ -37,6 +37,18 @@ class MainActivityViewModel(
         }
     }
 
+    fun updateExerciseItem(updatedExerciseItem: ExerciseItem) {
+        viewModelScope.launch {
+            dsModule.protoDS.updateData { currentList ->
+                currentList.copy(
+                    excList = currentList.excList.map { item ->
+                        if (item.id == updatedExerciseItem.id) updatedExerciseItem else item
+                    }.toPersistentList()
+                )
+            }
+        }
+    }
+
     fun deleteExerciseItem(itemId: String) {
         viewModelScope.launch {
             dsModule.protoDS.updateData { it ->

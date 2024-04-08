@@ -4,6 +4,7 @@ import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Base64
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -23,11 +24,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -39,6 +44,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,8 +52,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -122,7 +135,6 @@ fun ExercisesScreen(
             horizontalAlignment = Alignment.Start
         ) {
             items(exerciseData.excList, key = { it.id }) { exerciseItem ->
-//                val exerciseItem = exerciseData.excList[index]
                 val image: (@Composable () -> Unit) = {
                     when (val icon = exerciseItem.icon) {
                         is ExerciseIcon.DefaultIcon -> GetDefaultVectorIcon()
@@ -147,18 +159,9 @@ fun ExercisesScreen(
                         }
                     }
                 }
-//                SwipeToDeleteContainer(
-//                    item = exerciseItem, onDelete = {
-//                        viewModel.deleteExerciseItem(
-//                            index
-//                        )
-//                    }
-//                ) {
                 RowItem(
                     icon = image,
-//                        title = it.exTitle,
                     title = exerciseItem.exTitle,
-//                        description = it.exDescription,
                     description = "${exerciseItem.id} ${exerciseItem.exDescription}",
                     onClick = {
                         navCtl.navigate("${Screens.ExerciseItemViewScreen.name}/${exerciseItem.id}")
@@ -166,11 +169,10 @@ fun ExercisesScreen(
                     onLongClick = {
 //                            viewModel.deleteExerciseItem(index)
                     },
-                    onDelete = {
+                    onDismissToStart = {
                         viewModel.deleteExerciseItem(exerciseItem.id)
                     }
                 )
-//                }
             }
         }
     }
@@ -270,10 +272,29 @@ fun AddExerciseDialog(
 @Composable
 fun ExerciseItemViewScreen(
     exerciseItem: ExerciseItem,
-    onBackPressed: () -> Unit
+    onBackPressed: () -> Unit,
+    onSavePressed: (ExerciseItem) -> Unit
 ) {
+    var isEditing by remember { mutableStateOf(false) }
+    var editedTitle by remember { mutableStateOf(exerciseItem.exTitle) }
+    var editedDescription by remember { mutableStateOf(exerciseItem.exDescription) }
+    var editedBitmap by remember { mutableStateOf<Bitmap?>(null) }
+
     var showFullscreenImage by remember { mutableStateOf(false) }
     var fullscreenBitmap by remember { mutableStateOf<Bitmap?>(null) }
+
+    val focusManager = LocalFocusManager.current
+    val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    var textFieldValue by remember { mutableStateOf(TextFieldValue(editedTitle)) }
+
+    LaunchedEffect(isEditing) {
+        if (isEditing) {
+            focusRequester.requestFocus()
+            textFieldValue = textFieldValue.copy(selection = TextRange(editedTitle.length))
+        }
+    }
 
     if (showFullscreenImage && fullscreenBitmap != null) {
         ShowImage(
@@ -283,22 +304,98 @@ fun ExerciseItemViewScreen(
         )
     }
 
+    // Handle the Android back button press
+    BackHandler(enabled = isEditing) {
+        isEditing = false
+        editedTitle = exerciseItem.exTitle
+        editedDescription = exerciseItem.exDescription
+        editedBitmap = null
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = exerciseItem.exTitle,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
+//                    Text(
+//                        text = exerciseItem.exTitle,
+//                        maxLines = 2,
+//                        overflow = TextOverflow.Ellipsis
+//                    )
+
+                    if (isEditing) {
+                        OutlinedTextField(
+                            value = textFieldValue,
+                            onValueChange = {
+                                textFieldValue = it
+                                editedTitle = it.text
+                            },
+                            label = { Text("Title") },
+                            maxLines = 1,
+                            keyboardOptions = KeyboardOptions(
+                                imeAction = ImeAction.Done
+                            ),
+                            keyboardActions = KeyboardActions(
+                                onDone = {
+                                    focusManager.clearFocus()
+                                    keyboardController?.hide()
+                                }
+                            ),
+                            modifier = Modifier
+                                .focusRequester(focusRequester)
+                                .fillMaxWidth()
+//                                .padding(16.dp)
+                        )
+                    } else {
+                        Text(
+                            text = exerciseItem.exTitle,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBackPressed) {
+                    IconButton(
+                        onClick = {
+                            if (isEditing) {
+                                isEditing = false
+                                editedTitle = exerciseItem.exTitle
+                                editedDescription = exerciseItem.exDescription
+                                editedBitmap = null
+                            } else {
+                                onBackPressed()
+                            }
+                        }
+                    ) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 }
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    if (isEditing) {
+                        val updatedExerciseItem = exerciseItem.copy(
+                            exTitle = editedTitle,
+                            exDescription = editedDescription,
+                            icon = if (editedBitmap != null) {
+                                val base64String = encodeImageToBase64(editedBitmap!!)
+                                ExerciseIcon.RasterIcon(base64String)
+                            } else {
+                                exerciseItem.icon
+                            }
+                        )
+                        onSavePressed(updatedExerciseItem)
+                    }
+                    isEditing = !isEditing
+                },
+                shape = CircleShape
+            ) {
+                Icon(
+                    if (isEditing) Icons.Rounded.Check else Icons.Rounded.Edit,
+                    contentDescription = if (isEditing) "Save" else "Edit"
+                )
+            }
         }
     ) { innerPadding ->
         Column(
@@ -351,12 +448,26 @@ fun ExerciseItemViewScreen(
                     }
                 }
             }
-            Text(
-                text = exerciseItem.exDescription,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            )
+
+
+            if (isEditing) {
+                OutlinedTextField(
+                    value = editedDescription,
+                    onValueChange = { editedDescription = it },
+                    label = { Text("Description") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                )
+                // Add image picker functionality for editing the image
+            } else {
+                Text(
+                    text = exerciseItem.exDescription,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                )
+            }
         }
     }
 }
