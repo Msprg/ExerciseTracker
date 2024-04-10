@@ -3,8 +3,6 @@ package com.msprg.exerciseTracker.data
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.modules.SerializersModule
-import kotlinx.serialization.modules.polymorphic
 import java.util.UUID
 
 
@@ -32,12 +30,12 @@ sealed class ExerciseIcon {
 }
 
 
-val ExerciseIconModule = SerializersModule {
-    polymorphic(ExerciseIcon::class) {
-        subclass(ExerciseIcon.DefaultIcon::class, ExerciseIcon.DefaultIcon.serializer())
-        subclass(ExerciseIcon.RasterIcon::class, ExerciseIcon.RasterIcon.serializer())
-    }
-}
+//val ExerciseIconModule = SerializersModule {
+//    polymorphic(ExerciseIcon::class) {
+//        subclass(ExerciseIcon.DefaultIcon::class, ExerciseIcon.DefaultIcon.serializer())
+//        subclass(ExerciseIcon.RasterIcon::class, ExerciseIcon.RasterIcon.serializer())
+//    }
+//}
 
 
 //val json = Json { serializersModule = ExerciseIconModule }

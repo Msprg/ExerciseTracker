@@ -18,13 +18,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.msprg.exerciseTracker.ui.components.RowItemsMockup
 import com.msprg.exerciseTracker.ui.navigation.AppNavCtl
 import com.msprg.exerciseTracker.ui.navigation.Screens
 import com.msprg.exerciseTracker.ui.theme.ExerciseTrackerTheme
 
 @Composable
-fun ScheduleScreen() {
+fun ScheduleScreen(navCtl: NavController) {
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(

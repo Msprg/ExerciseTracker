@@ -90,8 +90,8 @@ object ImageUtils {
 
 @Composable
 fun ExercisesScreen(
-    viewModel: MainActivityViewModel = MainActivityViewModel(ExTrApplication.datastoremodule),
-    navCtl: NavController
+    navCtl: NavController,
+    viewModel: MainActivityViewModel = MainActivityViewModel(ExTrApplication.datastoremodule)
 ) {
     val exerciseData by viewModel.exerciseDataFlow.collectAsState(initial = ExercisesList())
 
@@ -235,7 +235,7 @@ fun ExerciseItemViewScreen(
                 text = exerciseItem.exDescription,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
+                    .padding(32.dp)
             )
         }
     }
@@ -379,6 +379,7 @@ fun ExerciseItemEditScreen(
                 Modifier
                     .size(200.dp)
                     .align(Alignment.CenterHorizontally)
+                    .fillMaxWidth()
                     .padding(top = 16.dp)
 
             if (editedBitmap != null) {
@@ -404,7 +405,7 @@ fun ExerciseItemEditScreen(
                 minLines = 13,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
+                    .padding(8.dp)
             )
         }
     }

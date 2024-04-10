@@ -34,7 +34,7 @@ import com.msprg.exerciseTracker.ui.theme.ExerciseTrackerTheme
 
 @Composable
 fun AppNavCtl(
-    startingScreen: Screens = Screens.ExercisesScreen,
+    startingScreen: Screens = Screens.RoutinesScreen,
     viewModel: MainActivityViewModel = MainActivityViewModel(ExTrApplication.datastoremodule)
 ) {
     val navController = rememberNavController()
@@ -141,13 +141,13 @@ fun AppNavCtl(
                 )
             }
             composable(route = Screens.RoutinesScreen.name) {
-                RoutinesScreen()
+                RoutinesScreen(navCtl = navController)
             }
             composable(route = Screens.ScheduleScreen.name) {
-                ScheduleScreen()
+                ScheduleScreen(navCtl = navController)
             }
             composable(route = Screens.HistoryScreen.name) {
-                HistoryScreen()
+                HistoryScreen(navCtl = navController)
             }
         }
 

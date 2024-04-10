@@ -14,14 +14,15 @@ import kotlinx.coroutines.launch
 class MainActivityViewModel(
     private val dsModule: IFDataStoreModule
 ) : ViewModel() {
-    val exerciseDataFlow: Flow<ExercisesList> = dsModule.protoDS.data
+    val exerciseDataFlow: Flow<ExercisesList> = dsModule.exercisesDS.data
+
     fun addExerciseItem(
         icon: ExerciseIcon,
         title: String,
         description: String
     ) {
         viewModelScope.launch {
-            dsModule.protoDS.updateData {
+            dsModule.exercisesDS.updateData {
                 it.copy(
                     excList = it.excList.mutate {
                         it.add(
@@ -39,7 +40,7 @@ class MainActivityViewModel(
 
     fun updateExerciseItem(updatedExerciseItem: ExerciseItem) {
         viewModelScope.launch {
-            dsModule.protoDS.updateData { currentList ->
+            dsModule.exercisesDS.updateData { currentList ->
                 currentList.copy(
                     excList = currentList.excList.map { item ->
                         if (item.id == updatedExerciseItem.id) updatedExerciseItem else item
@@ -51,7 +52,7 @@ class MainActivityViewModel(
 
     fun deleteExerciseItem(itemId: String) {
         viewModelScope.launch {
-            dsModule.protoDS.updateData { it ->
+            dsModule.exercisesDS.updateData { it ->
                 it.copy(
                     excList = it.excList.filterNot { it.id == itemId }.toPersistentList()
                 )

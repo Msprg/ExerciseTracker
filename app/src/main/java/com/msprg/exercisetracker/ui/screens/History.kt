@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.msprg.exerciseTracker.ui.components.RowItemsMockup
 import com.msprg.exerciseTracker.ui.navigation.AppNavCtl
 import com.msprg.exerciseTracker.ui.navigation.Screens
@@ -28,7 +29,7 @@ import com.msprg.exerciseTracker.ui.theme.ExerciseTrackerTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HistoryScreen() {
+fun HistoryScreen(navCtl: NavController) {
     Scaffold(modifier = Modifier.fillMaxSize(),
         content = { paddingValues ->
             Column(
