@@ -24,22 +24,26 @@ import androidx.navigation.navArgument
 import com.msprg.exerciseTracker.ExTrApplication
 import com.msprg.exerciseTracker.MainActivityViewModel
 import com.msprg.exerciseTracker.data.ExercisesList
+import com.msprg.exerciseTracker.data.RoutinesList
 import com.msprg.exerciseTracker.ui.screens.ExerciseItemEditScreen
 import com.msprg.exerciseTracker.ui.screens.ExerciseItemViewScreen
 import com.msprg.exerciseTracker.ui.screens.ExercisesScreen
 import com.msprg.exerciseTracker.ui.screens.HistoryScreen
+import com.msprg.exerciseTracker.ui.screens.RoutineItemEditScreen
 import com.msprg.exerciseTracker.ui.screens.RoutinesScreen
 import com.msprg.exerciseTracker.ui.screens.ScheduleScreen
 import com.msprg.exerciseTracker.ui.theme.ExerciseTrackerTheme
+import com.msprg.exerciseTracker.ui.viewmodels.RoutinesViewModel
 
 @Composable
 fun AppNavCtl(
     startingScreen: Screens = Screens.RoutinesScreen,
-    viewModel: MainActivityViewModel = MainActivityViewModel(ExTrApplication.datastoremodule)
+    viewModel: MainActivityViewModel = MainActivityViewModel(ExTrApplication.datastoremodule),
+    routinesViewModel: RoutinesViewModel = RoutinesViewModel(ExTrApplication.datastoremodule)
 ) {
     val navController = rememberNavController()
     val exerciseData by viewModel.exerciseDataFlow.collectAsState(initial = ExercisesList())
-    ExTrApplication
+    val routinesData by routinesViewModel.routinesDataFlow.collectAsState(initial = RoutinesList())
 
     Scaffold(
         bottomBar = {
@@ -142,6 +146,32 @@ fun AppNavCtl(
             }
             composable(route = Screens.RoutinesScreen.name) {
                 RoutinesScreen(navCtl = navController)
+            }
+            composable(
+                route = "${Screens.RoutineItemEditScreen.name}/{routineItemId}",
+                arguments = listOf(navArgument("routineItemId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val routineItemId = backStackEntry.arguments?.getString("routineItemId")
+                val routineItem = routinesData.routineList.find { it.id == routineItemId }
+                RoutineItemEditScreen(
+                    routineItem = routineItem,
+                    onBackPressed = { navController.popBackStack() },
+                    onSavePressed = { updatedRoutineItem ->
+                        routinesViewModel.updateRoutine(updatedRoutineItem)
+                        navController.popBackStack()
+                    }
+                )
+            }
+
+            composable(route = Screens.RoutineItemEditScreen.name) {
+                RoutineItemEditScreen(
+                    routineItem = null,
+                    onBackPressed = { navController.popBackStack() },
+                    onSavePressed = { newRoutineItem ->
+                        routinesViewModel.addRoutine(newRoutineItem)
+                        navController.popBackStack()
+                    }
+                )
             }
             composable(route = Screens.ScheduleScreen.name) {
                 ScheduleScreen(navCtl = navController)

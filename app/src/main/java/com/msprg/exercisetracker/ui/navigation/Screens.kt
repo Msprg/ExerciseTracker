@@ -5,6 +5,7 @@ enum class Screens {
     ExerciseItemViewScreen,
     ExerciseItemEditScreen,
     RoutinesScreen,
+    RoutineItemEditScreen,
     ScheduleScreen,
     HistoryScreen,
 }
