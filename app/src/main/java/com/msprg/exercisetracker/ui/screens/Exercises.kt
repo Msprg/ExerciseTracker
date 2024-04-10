@@ -289,10 +289,24 @@ fun ExerciseItemViewScreen(
 
     var textFieldValue by remember { mutableStateOf(TextFieldValue(editedTitle)) }
 
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri ->
+            if (uri != null) {
+                val inputStream = ExTrApplication.appContext.contentResolver.openInputStream(uri)
+                editedBitmap = BitmapFactory.decodeStream(inputStream)
+            }
+        }
+    )
+
     LaunchedEffect(isEditing) {
         if (isEditing) {
             focusRequester.requestFocus()
             textFieldValue = textFieldValue.copy(selection = TextRange(editedTitle.length))
+            editedBitmap = when (val icon = exerciseItem.icon) {
+                is ExerciseIcon.DefaultIcon -> null
+                is ExerciseIcon.RasterIcon -> decodeBase64ToImage(icon.imageBase64)
+            }
         }
     }
 
@@ -316,12 +330,6 @@ fun ExerciseItemViewScreen(
         topBar = {
             TopAppBar(
                 title = {
-//                    Text(
-//                        text = exerciseItem.exTitle,
-//                        maxLines = 2,
-//                        overflow = TextOverflow.Ellipsis
-//                    )
-
                     if (isEditing) {
                         OutlinedTextField(
                             value = textFieldValue,
@@ -330,7 +338,7 @@ fun ExerciseItemViewScreen(
                                 editedTitle = it.text
                             },
                             label = { Text("Title") },
-                            maxLines = 1,
+                            singleLine = true,
                             keyboardOptions = KeyboardOptions(
                                 imeAction = ImeAction.Done
                             ),
@@ -343,7 +351,6 @@ fun ExerciseItemViewScreen(
                             modifier = Modifier
                                 .focusRequester(focusRequester)
                                 .fillMaxWidth()
-//                                .padding(16.dp)
                         )
                     } else {
                         Text(
@@ -382,7 +389,7 @@ fun ExerciseItemViewScreen(
                                 val base64String = encodeImageToBase64(editedBitmap!!)
                                 ExerciseIcon.RasterIcon(base64String)
                             } else {
-                                exerciseItem.icon
+                                ExerciseIcon.DefaultIcon
                             }
                         )
                         onSavePressed(updatedExerciseItem)
@@ -404,8 +411,20 @@ fun ExerciseItemViewScreen(
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
         ) {
-            when (val icon = exerciseItem.icon) {
-                is ExerciseIcon.DefaultIcon -> {
+            if (isEditing) {
+                if (editedBitmap != null) {
+                    Image(
+                        bitmap = editedBitmap!!.asImageBitmap(),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(200.dp)
+                            .align(Alignment.CenterHorizontally)
+                            .padding(top = 16.dp)
+                            .clickable {
+                                editedBitmap = null
+                            }
+                    )
+                } else {
                     Icon(
                         imageVector = Icons.Default.FitnessCenter,
                         contentDescription = null,
@@ -413,30 +432,14 @@ fun ExerciseItemViewScreen(
                             .size(200.dp)
                             .align(Alignment.CenterHorizontally)
                             .padding(top = 16.dp)
+                            .clickable {
+                                launcher.launch("image/*")
+                            }
                     )
                 }
-
-                is ExerciseIcon.RasterIcon -> {
-                    val bitmap = try {
-                        decodeBase64ToImage(icon.imageBase64)
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        null
-                    }
-                    if (bitmap != null) {
-                        Image(
-                            bitmap = bitmap.asImageBitmap(),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(200.dp)
-                                .align(Alignment.CenterHorizontally)
-                                .padding(top = 16.dp)
-                                .clickable {
-                                    fullscreenBitmap = bitmap
-                                    showFullscreenImage = true
-                                }
-                        )
-                    } else {
+            } else {
+                when (val icon = exerciseItem.icon) {
+                    is ExerciseIcon.DefaultIcon -> {
                         Icon(
                             imageVector = Icons.Default.FitnessCenter,
                             contentDescription = null,
@@ -446,20 +449,52 @@ fun ExerciseItemViewScreen(
                                 .padding(top = 16.dp)
                         )
                     }
+
+                    is ExerciseIcon.RasterIcon -> {
+                        val bitmap = try {
+                            decodeBase64ToImage(icon.imageBase64)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            null
+                        }
+                        if (bitmap != null) {
+                            Image(
+                                bitmap = bitmap.asImageBitmap(),
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(200.dp)
+                                    .align(Alignment.CenterHorizontally)
+                                    .padding(top = 16.dp)
+                                    .clickable {
+                                        fullscreenBitmap = bitmap
+                                        showFullscreenImage = true
+                                    }
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.FitnessCenter,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(200.dp)
+                                    .align(Alignment.CenterHorizontally)
+                                    .padding(top = 16.dp)
+                            )
+                        }
+                    }
                 }
             }
 
-
+            // Description TextField remains unchanged
             if (isEditing) {
                 OutlinedTextField(
                     value = editedDescription,
                     onValueChange = { editedDescription = it },
                     label = { Text("Description") },
+                    minLines = 13,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp)
                 )
-                // Add image picker functionality for editing the image
             } else {
                 Text(
                     text = exerciseItem.exDescription,
