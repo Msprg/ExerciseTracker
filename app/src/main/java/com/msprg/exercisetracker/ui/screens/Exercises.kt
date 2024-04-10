@@ -78,16 +78,18 @@ import com.msprg.exerciseTracker.ui.navigation.Screens
 import com.msprg.exerciseTracker.ui.theme.ExerciseTrackerTheme
 import java.io.ByteArrayOutputStream
 
-fun encodeImageToBase64(bitmap: Bitmap): String {
-    val byteArrayOutputStream = ByteArrayOutputStream()
-    bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
-    val byteArray = byteArrayOutputStream.toByteArray()
-    return Base64.encodeToString(byteArray, Base64.DEFAULT)
-}
+object ImageUtils {
+    fun encodeImageToBase64(bitmap: Bitmap): String {
+        val byteArrayOutputStream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
+        val byteArray = byteArrayOutputStream.toByteArray()
+        return Base64.encodeToString(byteArray, Base64.DEFAULT)
+    }
 
-fun decodeBase64ToImage(encodedString: String): Bitmap {
-    val decodedBytes = Base64.decode(encodedString, Base64.DEFAULT)
-    return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+    fun decodeBase64ToImage(encodedString: String): Bitmap {
+        val decodedBytes = Base64.decode(encodedString, Base64.DEFAULT)
+        return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+    }
 }
 
 @Composable
@@ -97,30 +99,20 @@ fun ExercisesScreen(
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
     val exerciseData by viewModel.exerciseDataFlow.collectAsState(initial = ExercisesList())
-//	val scope = rememberCoroutineScope()
 
     if (showAddDialog) {
         AddExerciseDialog(
             onDismiss = { showAddDialog = false }
         ) { title: String, description: String, bitmap: Bitmap? ->
-            val icon = if (bitmap != null) {
-                val base64String = encodeImageToBase64(bitmap)
-                ExerciseIcon.RasterIcon(base64String)
-            } else {
-                ExerciseIcon.DefaultIcon
-            }
-            viewModel.addExerciseItem(
-                icon = icon,
-                title, description
-            )
+            val icon = bitmap?.let { ExerciseIcon.RasterIcon(ImageUtils.encodeImageToBase64(it)) }
+                ?: ExerciseIcon.DefaultIcon
+            viewModel.addExerciseItem(icon = icon, title, description)
         }
     }
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
-                onClick = {
-                    showAddDialog = true
-                },
+                onClick = { showAddDialog = true },
                 shape = CircleShape
             ) {
                 Icon(Icons.Rounded.Add, contentDescription = "Add")
@@ -134,40 +126,24 @@ fun ExercisesScreen(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.Start
         ) {
+            val iconMod = Modifier
+                .size(55.dp)
+                .padding(start = 8.dp)
             items(exerciseData.excList, key = { it.id }) { exerciseItem ->
-                val image: (@Composable () -> Unit) = {
-                    when (val icon = exerciseItem.icon) {
-                        is ExerciseIcon.DefaultIcon -> GetDefaultVectorIcon()
-                        is ExerciseIcon.RasterIcon -> {
-                            val bitmap = try {
-                                decodeBase64ToImage(icon.imageBase64)
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                                null
-                            }
-                            if (bitmap != null) {
-                                Image(
-                                    bitmap = bitmap.asImageBitmap(),
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .size(55.dp)
-                                        .padding(start = 8.dp)
-                                )
-                            } else {
-                                GetDefaultVectorIcon()
-                            }
-                        }
-                    }
-                }
                 RowItem(
-                    icon = image,
+                    icon = {
+                        when (val icon = exerciseItem.icon) {
+                            is ExerciseIcon.DefaultIcon -> DefaultVectorIcon(iconMod)
+                            is ExerciseIcon.RasterIcon -> RasterIcon(
+                                iconMod,
+                                base64String = icon.imageBase64
+                            )
+                        }
+                    },
                     title = exerciseItem.exTitle,
                     description = "${exerciseItem.id} ${exerciseItem.exDescription}",
                     onClick = {
                         navCtl.navigate("${Screens.ExerciseItemViewScreen.name}/${exerciseItem.id}")
-                    },
-                    onLongClick = {
-//                            viewModel.deleteExerciseItem(index)
                     },
                     onDismissToStart = {
                         viewModel.deleteExerciseItem(exerciseItem.id)
@@ -179,14 +155,33 @@ fun ExercisesScreen(
 }
 
 @Composable
-private fun GetDefaultVectorIcon() {
+private fun DefaultVectorIcon(modifier: Modifier = Modifier) {
     Icon(
         imageVector = Icons.Default.FitnessCenter,
         contentDescription = null,
-        modifier = Modifier
-            .size(55.dp)
-            .padding(start = 8.dp)
+        modifier = modifier
+//            .size(55.dp)
+//            .padding(start = 8.dp)
     )
+}
+
+@Composable
+private fun RasterIcon(modifier: Modifier = Modifier, base64String: String) {
+    val bitmap = try {
+        ImageUtils.decodeBase64ToImage(base64String)
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
+    bitmap?.let {
+        Image(
+            bitmap = it.asImageBitmap(),
+            contentDescription = null,
+            modifier = modifier
+//                .size(55.dp)
+//                .padding(start = 8.dp)
+        )
+    } ?: DefaultVectorIcon()
 }
 
 @Composable
@@ -292,8 +287,8 @@ fun ExerciseItemViewScreen(
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
         onResult = { uri ->
-            if (uri != null) {
-                val inputStream = ExTrApplication.appContext.contentResolver.openInputStream(uri)
+            uri?.let {
+                val inputStream = ExTrApplication.appContext.contentResolver.openInputStream(it)
                 editedBitmap = BitmapFactory.decodeStream(inputStream)
             }
         }
@@ -305,17 +300,9 @@ fun ExerciseItemViewScreen(
             textFieldValue = textFieldValue.copy(selection = TextRange(editedTitle.length))
             editedBitmap = when (val icon = exerciseItem.icon) {
                 is ExerciseIcon.DefaultIcon -> null
-                is ExerciseIcon.RasterIcon -> decodeBase64ToImage(icon.imageBase64)
+                is ExerciseIcon.RasterIcon -> ImageUtils.decodeBase64ToImage(icon.imageBase64)
             }
         }
-    }
-
-    if (showFullscreenImage && fullscreenBitmap != null) {
-        ShowImage(
-            showFullscreenImage = showFullscreenImage,
-            fullscreenBitmap = fullscreenBitmap,
-            onDismiss = { showFullscreenImage = false }
-        )
     }
 
     // Handle the Android back button press
@@ -339,15 +326,11 @@ fun ExerciseItemViewScreen(
                             },
                             label = { Text("Title") },
                             singleLine = true,
-                            keyboardOptions = KeyboardOptions(
-                                imeAction = ImeAction.Done
-                            ),
-                            keyboardActions = KeyboardActions(
-                                onDone = {
-                                    focusManager.clearFocus()
-                                    keyboardController?.hide()
-                                }
-                            ),
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                            keyboardActions = KeyboardActions(onDone = {
+                                focusManager.clearFocus()
+                                keyboardController?.hide()
+                            }),
                             modifier = Modifier
                                 .focusRequester(focusRequester)
                                 .fillMaxWidth()
@@ -361,18 +344,16 @@ fun ExerciseItemViewScreen(
                     }
                 },
                 navigationIcon = {
-                    IconButton(
-                        onClick = {
-                            if (isEditing) {
-                                isEditing = false
-                                editedTitle = exerciseItem.exTitle
-                                editedDescription = exerciseItem.exDescription
-                                editedBitmap = null
-                            } else {
-                                onBackPressed()
-                            }
+                    IconButton(onClick = {
+                        if (isEditing) {    //revert the changes and exit the edit mode
+                            isEditing = false
+                            editedTitle = exerciseItem.exTitle
+                            editedDescription = exerciseItem.exDescription
+                            editedBitmap = null
+                        } else {
+                            onBackPressed()
                         }
-                    ) {
+                    }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 }
@@ -385,12 +366,9 @@ fun ExerciseItemViewScreen(
                         val updatedExerciseItem = exerciseItem.copy(
                             exTitle = editedTitle,
                             exDescription = editedDescription,
-                            icon = if (editedBitmap != null) {
-                                val base64String = encodeImageToBase64(editedBitmap!!)
-                                ExerciseIcon.RasterIcon(base64String)
-                            } else {
-                                ExerciseIcon.DefaultIcon
-                            }
+                            icon = editedBitmap?.let {
+                                ExerciseIcon.RasterIcon(ImageUtils.encodeImageToBase64(it))
+                            } ?: ExerciseIcon.DefaultIcon
                         )
                         onSavePressed(updatedExerciseItem)
                     }
@@ -411,80 +389,51 @@ fun ExerciseItemViewScreen(
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
         ) {
-            if (isEditing) {
-                if (editedBitmap != null) {
+            val iconMod =
+                Modifier
+                    .size(200.dp)
+                    .align(Alignment.CenterHorizontally)
+                    .padding(top = 16.dp)
+            when {
+                isEditing && editedBitmap != null -> {
                     Image(
                         bitmap = editedBitmap!!.asImageBitmap(),
                         contentDescription = null,
-                        modifier = Modifier
-                            .size(200.dp)
-                            .align(Alignment.CenterHorizontally)
-                            .padding(top = 16.dp)
-                            .clickable {
-                                editedBitmap = null
-                            }
+                        modifier = iconMod
+                            .clickable { editedBitmap = null }
                     )
-                } else {
+                }
+
+                isEditing -> {
                     Icon(
                         imageVector = Icons.Default.FitnessCenter,
                         contentDescription = null,
-                        modifier = Modifier
-                            .size(200.dp)
-                            .align(Alignment.CenterHorizontally)
-                            .padding(top = 16.dp)
-                            .clickable {
-                                launcher.launch("image/*")
-                            }
+                        modifier = iconMod
+                            .clickable { launcher.launch("image/*") }
                     )
                 }
-            } else {
-                when (val icon = exerciseItem.icon) {
-                    is ExerciseIcon.DefaultIcon -> {
-                        Icon(
-                            imageVector = Icons.Default.FitnessCenter,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(200.dp)
-                                .align(Alignment.CenterHorizontally)
-                                .padding(top = 16.dp)
-                        )
-                    }
 
-                    is ExerciseIcon.RasterIcon -> {
-                        val bitmap = try {
-                            decodeBase64ToImage(icon.imageBase64)
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            null
-                        }
-                        if (bitmap != null) {
-                            Image(
-                                bitmap = bitmap.asImageBitmap(),
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .size(200.dp)
-                                    .align(Alignment.CenterHorizontally)
-                                    .padding(top = 16.dp)
+                else -> {
+                    when (val icon = exerciseItem.icon) {
+                        is ExerciseIcon.DefaultIcon -> DefaultVectorIcon(
+                            modifier = iconMod
+                        )
+
+                        is ExerciseIcon.RasterIcon -> {
+                            val bitmap = ImageUtils.decodeBase64ToImage(icon.imageBase64)
+                            RasterIcon(
+                                modifier = iconMod
                                     .clickable {
                                         fullscreenBitmap = bitmap
                                         showFullscreenImage = true
-                                    }
-                            )
-                        } else {
-                            Icon(
-                                imageVector = Icons.Default.FitnessCenter,
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .size(200.dp)
-                                    .align(Alignment.CenterHorizontally)
-                                    .padding(top = 16.dp)
+                                    },
+                                icon.imageBase64
                             )
                         }
                     }
                 }
             }
 
-            // Description TextField remains unchanged
             if (isEditing) {
                 OutlinedTextField(
                     value = editedDescription,
@@ -505,40 +454,47 @@ fun ExerciseItemViewScreen(
             }
         }
     }
+
+    if (showFullscreenImage && fullscreenBitmap != null) {
+        ShowFullscreenImage(
+            bitmap = fullscreenBitmap,
+            onDismiss = { showFullscreenImage = false }
+        )
+    }
 }
 
 @Composable
-private fun ShowImage(
-    showFullscreenImage: Boolean,
-    fullscreenBitmap: Bitmap?,
+private fun ShowFullscreenImage(
+    bitmap: Bitmap?,
     onDismiss: () -> Unit
 ) {
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black)
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    onClick = onDismiss
-                )
+    bitmap?.let {
+        Dialog(
+            onDismissRequest = onDismiss,
+            properties = DialogProperties(usePlatformDefaultWidth = false)
         ) {
-            Image(
-                bitmap = fullscreenBitmap!!.asImageBitmap(),
-                contentDescription = null,
+            Box(
                 modifier = Modifier
-                    .align(Alignment.Center)
+                    .fillMaxSize()
+                    .background(Color.Black)
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
-                        indication = null
-                    ) {
-                        // Do nothing when clicking on the image
-                    }
-            )
+                        indication = null,
+                        onClick = onDismiss
+                    )
+            ) {
+                Image(
+                    bitmap = it.asImageBitmap(),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClick = {} // intended behaviour
+                        )
+                )
+            }
         }
     }
 }
