@@ -23,15 +23,13 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.msprg.exerciseTracker.ExTrApplication
 import com.msprg.exerciseTracker.MainActivityViewModel
-import com.msprg.exerciseTracker.data.ExerciseIcon
 import com.msprg.exerciseTracker.data.ExercisesList
-import com.msprg.exerciseTracker.ui.screens.AddExerciseDialog
+import com.msprg.exerciseTracker.ui.screens.ExerciseItemEditScreen
 import com.msprg.exerciseTracker.ui.screens.ExerciseItemViewScreen
 import com.msprg.exerciseTracker.ui.screens.ExercisesScreen
 import com.msprg.exerciseTracker.ui.screens.HistoryScreen
 import com.msprg.exerciseTracker.ui.screens.RoutinesScreen
 import com.msprg.exerciseTracker.ui.screens.ScheduleScreen
-import com.msprg.exerciseTracker.ui.screens.encodeImageToBase64
 import com.msprg.exerciseTracker.ui.theme.ExerciseTrackerTheme
 
 @Composable
@@ -96,8 +94,8 @@ fun AppNavCtl(
                     ExerciseItemViewScreen(
                         exerciseItem = exerciseItem,
                         onBackPressed = { navController.popBackStack() },
-                        onSavePressed = { updatedExerciseItem ->
-                            viewModel.updateExerciseItem(updatedExerciseItem)
+                        onEditPressed = {
+                            navController.navigate("${Screens.ExerciseItemEditScreen.name}/$exerciseItemUUID")
                         }
                     )
                 } else {
@@ -117,35 +115,30 @@ fun AppNavCtl(
             ) { backStackEntry ->
                 val exerciseItemUUID = backStackEntry.arguments?.getString("exerciseItemUUID") ?: ""
                 val exerciseItem = exerciseData.excList.find { it.id == exerciseItemUUID }
-                if (exerciseItem != null) {
-                    AddExerciseDialog(
-                        onDismiss = { navController.popBackStack() },
-                        onSave = { title, description, bitmap ->
-                            // Update the exercise item with the edited values
-                            val updatedExerciseItem = exerciseItem.copy(
-                                exTitle = title,
-                                exDescription = description,
-                                icon = if (bitmap != null) {
-                                    val base64String = encodeImageToBase64(bitmap)
-                                    ExerciseIcon.RasterIcon(base64String)
-                                } else {
-                                    exerciseItem.icon
-                                }
-                            )
-                            viewModel.updateExerciseItem(updatedExerciseItem)
-                            navController.popBackStack()
-                        }
-                    )
-                } else {
-                    // Handle the case when the exercise item is not found
-                    // You can show an error message or navigate back to the previous screen
-                    Toast.makeText(
-                        ExTrApplication.appContext,
-                        "Exercise item not found",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    navController.popBackStack()
-                }
+                ExerciseItemEditScreen(
+                    exerciseItem = exerciseItem,
+                    onBackPressed = { navController.popBackStack() },
+                    onSavePressed = { updatedExerciseItem ->
+                        viewModel.updateExerciseItem(updatedExerciseItem)
+                        navController.popBackStack()
+                    }
+                )
+            }
+            composable(
+                route = Screens.ExerciseItemEditScreen.name
+            ) {
+                ExerciseItemEditScreen(
+                    exerciseItem = null,
+                    onBackPressed = { navController.popBackStack() },
+                    onSavePressed = { newExerciseItem ->
+                        viewModel.addExerciseItem(
+                            icon = newExerciseItem.icon,
+                            newExerciseItem.exTitle,
+                            newExerciseItem.exDescription
+                        )
+                        navController.popBackStack()
+                    }
+                )
             }
             composable(route = Screens.RoutinesScreen.name) {
                 RoutinesScreen()
