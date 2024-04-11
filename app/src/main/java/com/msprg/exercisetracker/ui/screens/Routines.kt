@@ -2,24 +2,26 @@ package com.msprg.exerciseTracker.ui.screens
 
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.EventRepeat
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -27,7 +29,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -44,11 +45,15 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.msprg.exerciseTracker.ExTrApplication
+import com.msprg.exerciseTracker.MainActivityViewModel
+import com.msprg.exerciseTracker.data.ExerciseIcon
+import com.msprg.exerciseTracker.data.ExercisesList
 import com.msprg.exerciseTracker.data.RoutineItem
 import com.msprg.exerciseTracker.data.RoutinesList
 import com.msprg.exerciseTracker.ui.components.RowItem
@@ -57,6 +62,7 @@ import com.msprg.exerciseTracker.ui.navigation.Screens
 import com.msprg.exerciseTracker.ui.theme.ExerciseTrackerTheme
 import com.msprg.exerciseTracker.ui.viewmodels.RoutinesViewModel
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toPersistentList
 import java.util.UUID
 
 @Composable
@@ -100,6 +106,7 @@ fun RoutinesScreen(
                     description = "${routineItem.id} ${routineItem.routineDescription}",
                     onClick = {
 //                        navCtl.navigate("${Screens.RoutineItemViewScreen.name}/${routineItem.id}")
+                        navCtl.navigate("${Screens.RoutineItemEditScreen.name}/${routineItem.id}")
                     },
                     onDismissToStart = {
                         viewModel.deleteRoutine(routineItem.id)
@@ -131,8 +138,12 @@ fun RoutinesScreen(
 fun RoutineItemEditScreen(
     routineItem: RoutineItem?,
     onBackPressed: () -> Unit,
-    onSavePressed: (RoutineItem) -> Unit
+    onSavePressed: (RoutineItem) -> Unit,
+    viewModel: MainActivityViewModel = MainActivityViewModel(ExTrApplication.datastoremodule)
+
 ) {
+    val exerciseData by viewModel.exerciseDataFlow.collectAsState(initial = ExercisesList())
+
     var editedTitle by remember { mutableStateOf(routineItem?.routineTitle ?: "") }
     var editedDescription by remember { mutableStateOf(routineItem?.routineDescription ?: "") }
     var editedExerciseList by remember {
@@ -153,34 +164,6 @@ fun RoutineItemEditScreen(
     }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    OutlinedTextField(
-                        value = textFieldValue,
-                        onValueChange = {
-                            textFieldValue = it
-                            editedTitle = it.text
-                        },
-                        label = { Text("Title") },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                        keyboardActions = KeyboardActions(onDone = {
-                            focusManager.clearFocus()
-                            keyboardController?.hide()
-                        }),
-                        modifier = Modifier
-                            .focusRequester(focusRequester)
-                            .fillMaxWidth()
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBackPressed) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                }
-            )
-        },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
@@ -203,23 +186,118 @@ fun RoutineItemEditScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .verticalScroll(rememberScrollState())
+//                .verticalScroll(rememberScrollState())
         ) {
+            OutlinedTextField(
+                value = textFieldValue,
+                onValueChange = {
+                    textFieldValue = it
+                    editedTitle = it.text
+                },
+                label = { Text("Title") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(onDone = {
+                    focusManager.clearFocus()
+                    keyboardController?.hide()
+                }),
+                modifier = Modifier
+                    .focusRequester(focusRequester)
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            )
+
             OutlinedTextField(
                 value = editedDescription,
                 onValueChange = { editedDescription = it },
                 label = { Text("Description") },
-                minLines = 13,
+                minLines = 4,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp)
             )
 
-            // TODO: Add exercise selector
+            var repetitionsText by remember {
+                mutableStateOf(
+                    routineItem?.repetitions?.toString() ?: ""
+                )
+            }
+
+            OutlinedTextField(
+                value = repetitionsText,
+                onValueChange = { newValue ->
+                    repetitionsText = newValue.filter { it.isDigit() }
+                },
+                label = { Text("Repetitions") },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Done
+                ),
+                modifier = Modifier
+                    .align(Alignment.End)
+//                    .fillMaxWidth()
+                    .padding(8.dp)
+            )
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            ) {
+                items(editedExerciseList, key = { it.exerciseId }) { routineExercise ->
+                    val exercise = exerciseData.excList.find { it.id == routineExercise.exerciseId }
+                    RowItem(
+                        icon = {
+                            when (val icon = exercise?.icon) {
+                                is ExerciseIcon.DefaultIcon -> DefaultVectorIcon(
+                                    modifier = Modifier
+                                        .size(55.dp)
+                                        .padding(start = 8.dp)
+                                )
+
+                                is ExerciseIcon.RasterIcon -> RasterIcon(
+                                    modifier = Modifier
+                                        .size(55.dp)
+                                        .padding(start = 8.dp),
+                                    base64String = icon.imageBase64
+                                )
+
+                                else -> Box(modifier = Modifier.size(55.dp))
+                            }
+                        },
+                        title = exercise?.exTitle ?: "",
+                        description = "Duration: ${routineExercise.duration}, Repetitions: ${routineExercise.repetitions}",
+                        onClick = {
+                            // Handle exercise click if needed
+                        },
+                        onDismissToStart = {
+                            // Remove the exercise from the editedExerciseList
+                            editedExerciseList = editedExerciseList.filterNot {
+                                it.exerciseId == routineExercise.exerciseId
+                            }.toPersistentList()
+                        }
+                    )
+                }
+            }
+            Spacer(Modifier.weight(1f))
+
+            Button(modifier = Modifier
+                .align(Alignment.CenterHorizontally), onClick = {
+
+                //todo: popup that lists all the exercises, and lets user to select one, adding it to editedExerciseList
+            }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add Exercise",
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Add Exercise")
+
+            }
         }
     }
 }
-
 
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
