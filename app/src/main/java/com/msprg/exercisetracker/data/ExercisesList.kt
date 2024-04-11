@@ -29,14 +29,3 @@ sealed class ExerciseIcon {
     @Serializable
     data class RasterIcon(val imageBase64: String) : ExerciseIcon()
 }
-
-
-//val ExerciseIconModule = SerializersModule {
-//    polymorphic(ExerciseIcon::class) {
-//        subclass(ExerciseIcon.DefaultIcon::class, ExerciseIcon.DefaultIcon.serializer())
-//        subclass(ExerciseIcon.RasterIcon::class, ExerciseIcon.RasterIcon.serializer())
-//    }
-//}
-
-
-//val json = Json { serializersModule = ExerciseIconModule }

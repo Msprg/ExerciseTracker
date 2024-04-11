@@ -325,7 +325,7 @@ fun ExerciseItemEditScreen(
     )
 
     LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
+        if (editedTitle == "") focusRequester.requestFocus()
         textFieldValue = textFieldValue.copy(selection = TextRange(editedTitle.length))
         editedBitmap = when (val icon = exerciseItem?.icon) {
             is ExerciseIcon.DefaultIcon -> null
@@ -452,7 +452,7 @@ fun ExerciseItemEditScreen(
                 value = editedDescription,
                 onValueChange = { editedDescription = it },
                 label = { Text("Description") },
-                minLines = 13,
+                minLines = 12,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp)

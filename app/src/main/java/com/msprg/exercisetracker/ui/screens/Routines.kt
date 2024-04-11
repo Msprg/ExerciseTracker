@@ -1,9 +1,12 @@
 package com.msprg.exerciseTracker.ui.screens
 
 import android.content.res.Configuration
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,6 +21,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.outlined.EventRepeat
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Check
@@ -26,6 +30,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -45,15 +50,19 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import com.msprg.exerciseTracker.ExTrApplication
 import com.msprg.exerciseTracker.MainActivityViewModel
 import com.msprg.exerciseTracker.data.ExerciseIcon
+import com.msprg.exerciseTracker.data.ExerciseItem
 import com.msprg.exerciseTracker.data.ExercisesList
+import com.msprg.exerciseTracker.data.RoutineExercise
 import com.msprg.exerciseTracker.data.RoutineItem
 import com.msprg.exerciseTracker.data.RoutinesList
 import com.msprg.exerciseTracker.ui.components.RowItem
@@ -152,6 +161,7 @@ fun RoutineItemEditScreen(
         )
     }
 
+
     val focusManager = LocalFocusManager.current
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -159,9 +169,11 @@ fun RoutineItemEditScreen(
     var textFieldValue by remember { mutableStateOf(TextFieldValue(editedTitle)) }
 
     LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
+        if (editedTitle == "") focusRequester.requestFocus()
         textFieldValue = textFieldValue.copy(selection = TextRange(editedTitle.length))
     }
+
+    var showExerciseSelectionDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         floatingActionButton = {
@@ -172,7 +184,6 @@ fun RoutineItemEditScreen(
                         routineTitle = editedTitle,
                         routineDescription = editedDescription,
                         exerciseList = editedExerciseList,
-                        repetitions = routineItem?.repetitions ?: 1
                     )
                     onSavePressed(updatedRoutineItem)
                 },
@@ -186,7 +197,6 @@ fun RoutineItemEditScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-//                .verticalScroll(rememberScrollState())
         ) {
             OutlinedTextField(
                 value = textFieldValue,
@@ -206,84 +216,125 @@ fun RoutineItemEditScreen(
                     .fillMaxWidth()
                     .padding(8.dp)
             )
+//            var repetitionsText by remember {
+//                mutableStateOf(
+//                    routineItem?.repetitions?.toString() ?: ""
+//                )
+//            }
 
-            OutlinedTextField(
-                value = editedDescription,
-                onValueChange = { editedDescription = it },
-                label = { Text("Description") },
-                minLines = 4,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-            )
-
-            var repetitionsText by remember {
-                mutableStateOf(
-                    routineItem?.repetitions?.toString() ?: ""
-                )
-            }
-
-            OutlinedTextField(
-                value = repetitionsText,
-                onValueChange = { newValue ->
-                    repetitionsText = newValue.filter { it.isDigit() }
-                },
-                label = { Text("Repetitions") },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Number,
-                    imeAction = ImeAction.Done
-                ),
-                modifier = Modifier
-                    .align(Alignment.End)
+//            OutlinedTextField(
+//                value = repetitionsText,
+//                onValueChange = { newValue ->
+//                    repetitionsText = newValue.filter { it.isDigit() }
+//                },
+//                label = { Text("Repetitions") },
+//                keyboardOptions = KeyboardOptions(
+//                    keyboardType = KeyboardType.Number,
+//                    imeAction = ImeAction.Done
+//                ),
+//                modifier = Modifier
+//                    .align(Alignment.End)
 //                    .fillMaxWidth()
-                    .padding(8.dp)
-            )
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-            ) {
-                items(editedExerciseList, key = { it.exerciseId }) { routineExercise ->
-                    val exercise = exerciseData.excList.find { it.id == routineExercise.exerciseId }
-                    RowItem(
-                        icon = {
-                            when (val icon = exercise?.icon) {
-                                is ExerciseIcon.DefaultIcon -> DefaultVectorIcon(
-                                    modifier = Modifier
-                                        .size(55.dp)
-                                        .padding(start = 8.dp)
-                                )
+//                    .padding(8.dp)
+//            )
+            Box(modifier = Modifier.weight(1f)) {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+//                        .padding(8.dp)
+                ) {
+                    items(editedExerciseList, key = { it.id }) { routineExercise ->
+                        val exercise =
+                            exerciseData.excList.find { it.id == routineExercise.exerciseId }
+                        RowItem(
+                            icon = {
+                                when (val icon = exercise?.icon) {
+                                    is ExerciseIcon.DefaultIcon -> DefaultVectorIcon(
+                                        modifier = Modifier
+                                            .size(55.dp)
+                                            .padding(start = 8.dp)
+                                    )
 
-                                is ExerciseIcon.RasterIcon -> RasterIcon(
-                                    modifier = Modifier
-                                        .size(55.dp)
-                                        .padding(start = 8.dp),
-                                    base64String = icon.imageBase64
-                                )
+                                    is ExerciseIcon.RasterIcon -> RasterIcon(
+                                        modifier = Modifier
+                                            .size(55.dp)
+                                            .padding(start = 8.dp),
+                                        base64String = icon.imageBase64
+                                    )
 
-                                else -> Box(modifier = Modifier.size(55.dp))
+                                    else -> Box(modifier = Modifier.size(55.dp))
+                                }
+                            },
+                            title = exercise?.exTitle ?: "",
+                            description = "Duration: ${exercise?.durationSeconds ?: 10}, " +
+                                    "Repetitions: ${routineExercise.repetitions}" +
+                                    "\n ${exercise?.exDescription}",
+                            onClick = {
+                                // Handle click on the RoutineExercise item
+                            },
+                            onDismissToStart = {
+                                // Remove the RoutineExercise from the editedExerciseList
+                                editedExerciseList = editedExerciseList.filterNot {
+                                    it.id == routineExercise.id
+                                }.toPersistentList()
+                            },
+                            trailingContent = {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.padding(end = 8.dp)
+                                ) {
+                                    IconButton(
+                                        onClick = {
+                                            // Decrement repetitions count
+                                            val updatedRepetitions =
+                                                (routineExercise.repetitions - 1).coerceAtLeast(1)
+                                            val updatedRoutineExercise =
+                                                routineExercise.copy(repetitions = updatedRepetitions)
+                                            editedExerciseList = editedExerciseList.map {
+                                                if (it.id == routineExercise.id) updatedRoutineExercise else it
+                                            }.toPersistentList()
+                                        }
+                                    ) {
+                                        Icon(
+                                            Icons.Default.Remove,
+                                            contentDescription = "Decrease repetitions"
+                                        )
+                                    }
+
+                                    Text(
+                                        text = routineExercise.repetitions.toString(),
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier
+                                            .width(24.dp)
+                                    )
+
+                                    IconButton(
+                                        onClick = {
+                                            // Increment repetitions count
+                                            val updatedRepetitions =
+                                                (routineExercise.repetitions + 1).coerceAtMost(99)
+                                            val updatedRoutineExercise =
+                                                routineExercise.copy(repetitions = updatedRepetitions)
+                                            editedExerciseList = editedExerciseList.map {
+                                                if (it.id == routineExercise.id) updatedRoutineExercise else it
+                                            }.toPersistentList()
+                                        }
+                                    ) {
+                                        Icon(
+                                            Icons.Default.Add,
+                                            contentDescription = "Increase repetitions"
+                                        )
+                                    }
+                                }
                             }
-                        },
-                        title = exercise?.exTitle ?: "",
-                        description = "Duration: ${routineExercise.duration}, Repetitions: ${routineExercise.repetitions}",
-                        onClick = {
-                            // Handle exercise click if needed
-                        },
-                        onDismissToStart = {
-                            // Remove the exercise from the editedExerciseList
-                            editedExerciseList = editedExerciseList.filterNot {
-                                it.exerciseId == routineExercise.exerciseId
-                            }.toPersistentList()
-                        }
-                    )
+                        )
+                    }
                 }
             }
-            Spacer(Modifier.weight(1f))
 
             Button(modifier = Modifier
                 .align(Alignment.CenterHorizontally), onClick = {
-
-                //todo: popup that lists all the exercises, and lets user to select one, adding it to editedExerciseList
+                showExerciseSelectionDialog = true
             }
             ) {
                 Icon(
@@ -294,6 +345,60 @@ fun RoutineItemEditScreen(
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Add Exercise")
 
+            }
+        }
+    }
+    if (showExerciseSelectionDialog) {
+        ExerciseSelectionDialog(
+            exercises = exerciseData.excList,
+            onExerciseSelected = { selectedExercise ->
+                val newRoutineExercise = RoutineExercise(
+                    exerciseId = selectedExercise.id,
+                    repetitions = 1 // one by default
+                )
+                editedExerciseList = editedExerciseList.add(newRoutineExercise)
+            },
+            onDismiss = {
+                showExerciseSelectionDialog = false
+            }
+        )
+    }
+}
+
+@Composable
+fun ExerciseSelectionDialog(
+    exercises: List<ExerciseItem>,
+    onExerciseSelected: (ExerciseItem) -> Unit,
+    onDismiss: () -> Unit
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(16.dp)
+        ) {
+            Text(
+                text = "Select an Exercise",
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+            LazyColumn {
+                items(exercises) { exercise ->
+                    Text(
+                        text = exercise.exTitle,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                onExerciseSelected(exercise)
+                                onDismiss()
+                            }
+                            .padding(vertical = 8.dp)
+                    )
+                }
             }
         }
     }
