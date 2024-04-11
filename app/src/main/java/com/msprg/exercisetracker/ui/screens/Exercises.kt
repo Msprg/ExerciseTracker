@@ -55,6 +55,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -143,7 +144,7 @@ fun ExercisesScreen(
 }
 
 @Composable
-private fun DefaultVectorIcon(modifier: Modifier = Modifier) {
+fun DefaultVectorIcon(modifier: Modifier = Modifier) {
     Icon(
         imageVector = Icons.Default.FitnessCenter,
         contentDescription = null,
@@ -152,7 +153,7 @@ private fun DefaultVectorIcon(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun RasterIcon(modifier: Modifier = Modifier, base64String: String) {
+fun RasterIcon(modifier: Modifier = Modifier, base64String: String) {
     val bitmap = try {
         ImageUtils.decodeBase64ToImage(base64String)
     } catch (e: Exception) {
@@ -232,6 +233,13 @@ fun ExerciseItemViewScreen(
             }
 
             Text(
+                text = "Duration: ${exerciseItem.durationSeconds} (seconds)",
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(16.dp)
+            )
+
+            Text(
                 text = exerciseItem.exDescription,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -293,6 +301,11 @@ fun ExerciseItemEditScreen(
 ) {
     var editedTitle by remember { mutableStateOf(exerciseItem?.exTitle ?: "") }
     var editedDescription by remember { mutableStateOf(exerciseItem?.exDescription ?: "") }
+    var editedDuration by remember {
+        mutableStateOf(
+            exerciseItem?.durationSeconds?.toString() ?: "10"
+        )
+    }
     var editedBitmap by remember { mutableStateOf<Bitmap?>(null) }
 
     val focusManager = LocalFocusManager.current
@@ -322,34 +335,34 @@ fun ExerciseItemEditScreen(
     }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    OutlinedTextField(
-                        value = textFieldValue,
-                        onValueChange = {
-                            textFieldValue = it
-                            editedTitle = it.text
-                        },
-                        label = { Text("Title") },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                        keyboardActions = KeyboardActions(onDone = {
-                            focusManager.clearFocus()
-                            keyboardController?.hide()
-                        }),
-                        modifier = Modifier
-                            .focusRequester(focusRequester)
-                            .fillMaxWidth()
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBackPressed) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                }
-            )
-        },
+//        topBar = {
+//            TopAppBar(
+//                title = {
+//                    OutlinedTextField(
+//                        value = textFieldValue,
+//                        onValueChange = {
+//                            textFieldValue = it
+//                            editedTitle = it.text
+//                        },
+//                        label = { Text("Title") },
+//                        singleLine = true,
+//                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+//                        keyboardActions = KeyboardActions(onDone = {
+//                            focusManager.clearFocus()
+//                            keyboardController?.hide()
+//                        }),
+//                        modifier = Modifier
+//                            .focusRequester(focusRequester)
+//                            .fillMaxWidth()
+//                    )
+//                },
+//                navigationIcon = {
+//                    IconButton(onClick = onBackPressed) {
+//                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+//                    }
+//                }
+//            )
+//        },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
@@ -357,6 +370,7 @@ fun ExerciseItemEditScreen(
                         id = exerciseItem?.id ?: UUID.randomUUID().toString(),
                         exTitle = editedTitle,
                         exDescription = editedDescription,
+                        durationSeconds = editedDuration.toInt(),
                         icon = editedBitmap?.let {
                             ExerciseIcon.RasterIcon(ImageUtils.encodeImageToBase64(it))
                         } ?: ExerciseIcon.DefaultIcon
@@ -375,6 +389,26 @@ fun ExerciseItemEditScreen(
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
         ) {
+
+            OutlinedTextField(
+                value = textFieldValue,
+                onValueChange = {
+                    textFieldValue = it
+                    editedTitle = it.text
+                },
+                label = { Text("Title") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(onDone = {
+                    focusManager.clearFocus()
+                    keyboardController?.hide()
+                }),
+                modifier = Modifier
+                    .focusRequester(focusRequester)
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            )
+
             val iconMod =
                 Modifier
                     .size(200.dp)
@@ -399,6 +433,22 @@ fun ExerciseItemEditScreen(
             }
 
             OutlinedTextField(
+                value = editedDuration,
+                onValueChange = { newValue ->
+                    editedDuration = newValue.filter { it.isDigit() }
+                },
+                label = { Text("Duration of Exercise (seconds)") },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Done
+                ),
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            )
+
+            OutlinedTextField(
                 value = editedDescription,
                 onValueChange = { editedDescription = it },
                 label = { Text("Description") },
@@ -410,7 +460,6 @@ fun ExerciseItemEditScreen(
         }
     }
 }
-
 
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)

@@ -17,7 +17,8 @@ data class ExerciseItem(
     val id: String = UUID.randomUUID().toString(),
     val icon: ExerciseIcon = ExerciseIcon.DefaultIcon,
     val exTitle: String = "",
-    val exDescription: String = ""
+    val exDescription: String = "",
+    val durationSeconds: Int = 10,
 )
 
 @Serializable
