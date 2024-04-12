@@ -29,6 +29,7 @@ import com.msprg.exerciseTracker.ui.screens.ExerciseItemEditScreen
 import com.msprg.exerciseTracker.ui.screens.ExerciseItemViewScreen
 import com.msprg.exerciseTracker.ui.screens.ExercisesScreen
 import com.msprg.exerciseTracker.ui.screens.HistoryScreen
+import com.msprg.exerciseTracker.ui.screens.PlayRoutineScreen
 import com.msprg.exerciseTracker.ui.screens.RoutineItemEditScreen
 import com.msprg.exerciseTracker.ui.screens.RoutinesScreen
 import com.msprg.exerciseTracker.ui.screens.ScheduleScreen
@@ -173,6 +174,20 @@ fun AppNavCtl(
                     }
                 )
             }
+            composable(
+                route = "${Screens.PlayRoutineScreen.name}/{routineItemId}",
+                arguments = listOf(navArgument("routineItemId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val routineItemId = backStackEntry.arguments?.getString("routineItemId")
+                val routineItem = routinesData.routineList.find { it.id == routineItemId }
+                if (routineItem != null) {
+                    PlayRoutineScreen(
+                        exerciseList = routineItem.exerciseList,
+                        onRoutineFinished = { navController.popBackStack() }
+                    )
+                }
+            }
+
             composable(route = Screens.ScheduleScreen.name) {
                 ScheduleScreen(navCtl = navController)
             }

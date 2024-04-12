@@ -1,6 +1,7 @@
 package com.msprg.exerciseTracker.ui.screens
 
 import android.content.res.Configuration
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -8,8 +9,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -30,6 +33,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -72,6 +76,7 @@ import com.msprg.exerciseTracker.ui.theme.ExerciseTrackerTheme
 import com.msprg.exerciseTracker.ui.viewmodels.RoutinesViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.delay
 import java.util.UUID
 
 @Composable
@@ -114,7 +119,6 @@ fun RoutinesScreen(
                     title = routineItem.routineTitle,
                     description = "${routineItem.id} ${routineItem.routineDescription}",
                     onClick = {
-//                        navCtl.navigate("${Screens.RoutineItemViewScreen.name}/${routineItem.id}")
                         navCtl.navigate("${Screens.RoutineItemEditScreen.name}/${routineItem.id}")
                     },
                     onDismissToStart = {
@@ -123,7 +127,7 @@ fun RoutinesScreen(
                     trailingContent = {
                         IconButton(
                             onClick = {
-                                // Handle play button click
+                                navCtl.navigate("${Screens.PlayRoutineScreen.name}/${routineItem.id}")
                             },
                             modifier = Modifier.padding(end = 8.dp)
                         ) {
@@ -137,6 +141,106 @@ fun RoutinesScreen(
                     }
                 )
             }
+        }
+    }
+}
+
+@Composable
+fun PlayRoutineScreen(
+    exerciseList: List<RoutineExercise>,
+    onRoutineFinished: () -> Unit,
+    viewModel: MainActivityViewModel = MainActivityViewModel(ExTrApplication.datastoremodule)
+) {
+    val exerciseData by viewModel.exerciseDataFlow.collectAsState(initial = ExercisesList())
+    var currentExerciseIndex by remember { mutableStateOf(0) }
+    val currentExercise = exerciseList.getOrNull(currentExerciseIndex)
+    val exercise =
+        currentExercise?.let { exerciseData.excList.find { it.id == currentExercise.exerciseId } }
+
+    var progress by remember { mutableStateOf(0f) }
+
+    LaunchedEffect(Unit) {
+        while (currentExerciseIndex < exerciseList.size) {
+            val currentExercise = exerciseList.getOrNull(currentExerciseIndex)
+            val exercise =
+                currentExercise?.let { exerciseData.excList.find { it.id == currentExercise.exerciseId } }
+
+            if (exercise != null) {
+                val exerciseDuration =
+                    exercise.durationSeconds * 1000L * currentExercise.repetitions
+                Log.d("170", "Waiting for $exerciseDuration")
+
+                val startTime = System.currentTimeMillis()
+                while (System.currentTimeMillis() - startTime < exerciseDuration) {
+                    val elapsedTime = System.currentTimeMillis() - startTime
+                    progress = elapsedTime.toFloat() / exerciseDuration
+                    delay(16) // Update progress every 16ms (approximately 60 frames per second)
+                }
+                progress = 1f // Ensure progress reaches 100% at the end of the exercise
+            } else {
+                if (currentExercise != null) {
+                    Log.d("182", "Exercise ${currentExercise.exerciseId} not found. Skipping...")
+                }
+            }
+
+            currentExerciseIndex++
+        }
+
+        Log.d("185", "End of routine")
+        onRoutineFinished()
+    }
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        LinearProgressIndicator(
+            progress = progress,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(8.dp)
+        )
+
+        if (exercise != null) {
+            Text(
+                text = exercise.exTitle,
+                style = MaterialTheme.typography.headlineLarge,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp)
+            )
+
+            val iconMod = Modifier.padding(18.dp)
+
+            when (val icon = exercise.icon) {
+                is ExerciseIcon.DefaultIcon -> DefaultVectorIcon(
+                    modifier = iconMod.size(50.dp)
+                )
+
+                is ExerciseIcon.RasterIcon -> RasterIcon(
+                    modifier = iconMod
+                        .fillMaxWidth()
+                        .fillMaxHeight(fraction = 0.45f),
+                    base64String = icon.imageBase64
+                )
+            }
+
+            Text(
+                text = "Duration: ${exercise.durationSeconds} seconds, Repetitions: ${currentExercise.repetitions}",
+                style = MaterialTheme.typography.bodyLarge
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = exercise.exDescription,
+                style = MaterialTheme.typography.headlineSmall,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            )
         }
     }
 }
@@ -216,27 +320,6 @@ fun RoutineItemEditScreen(
                     .fillMaxWidth()
                     .padding(8.dp)
             )
-//            var repetitionsText by remember {
-//                mutableStateOf(
-//                    routineItem?.repetitions?.toString() ?: ""
-//                )
-//            }
-
-//            OutlinedTextField(
-//                value = repetitionsText,
-//                onValueChange = { newValue ->
-//                    repetitionsText = newValue.filter { it.isDigit() }
-//                },
-//                label = { Text("Repetitions") },
-//                keyboardOptions = KeyboardOptions(
-//                    keyboardType = KeyboardType.Number,
-//                    imeAction = ImeAction.Done
-//                ),
-//                modifier = Modifier
-//                    .align(Alignment.End)
-//                    .fillMaxWidth()
-//                    .padding(8.dp)
-//            )
             Box(modifier = Modifier.weight(1f)) {
                 LazyColumn(
                     modifier = Modifier

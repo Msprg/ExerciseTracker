@@ -6,6 +6,7 @@ enum class Screens {
     ExerciseItemEditScreen,
     RoutinesScreen,
     RoutineItemEditScreen,
+    PlayRoutineScreen,
     ScheduleScreen,
     HistoryScreen,
 }
