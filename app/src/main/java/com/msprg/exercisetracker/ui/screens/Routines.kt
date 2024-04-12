@@ -23,6 +23,8 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.outlined.EventRepeat
@@ -78,6 +80,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.delay
 import java.util.UUID
+
 
 @Composable
 fun RoutinesScreen(
@@ -258,13 +261,14 @@ fun RoutineItemEditScreen(
     val exerciseData by viewModel.exerciseDataFlow.collectAsState(initial = ExercisesList())
 
     var editedTitle by remember { mutableStateOf(routineItem?.routineTitle ?: "") }
-    var editedDescription by remember { mutableStateOf(routineItem?.routineDescription ?: "") }
+//    val editedDescription by remember { mutableStateOf(routineItem?.routineDescription ?: "") }
     var editedExerciseList by remember {
         mutableStateOf(
             routineItem?.exerciseList ?: persistentListOf()
         )
     }
 
+    var expandedItemId by remember { mutableStateOf<String?>(null) }
 
     val focusManager = LocalFocusManager.current
     val focusRequester = remember { FocusRequester() }
@@ -286,7 +290,7 @@ fun RoutineItemEditScreen(
                     val updatedRoutineItem = RoutineItem(
                         id = routineItem?.id ?: UUID.randomUUID().toString(),
                         routineTitle = editedTitle,
-                        routineDescription = editedDescription,
+//                        routineDescription = editedDescription,
                         exerciseList = editedExerciseList,
                     )
                     onSavePressed(updatedRoutineItem)
@@ -322,13 +326,13 @@ fun RoutineItemEditScreen(
             )
             Box(modifier = Modifier.weight(1f)) {
                 LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-//                        .padding(8.dp)
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     items(editedExerciseList, key = { it.id }) { routineExercise ->
                         val exercise =
                             exerciseData.excList.find { it.id == routineExercise.exerciseId }
+                        val isExpanded = expandedItemId == routineExercise.id
+
                         RowItem(
                             icon = {
                                 when (val icon = exercise?.icon) {
@@ -353,7 +357,7 @@ fun RoutineItemEditScreen(
                                     "Repetitions: ${routineExercise.repetitions}" +
                                     "\n ${exercise?.exDescription}",
                             onClick = {
-                                // Handle click on the RoutineExercise item
+                                expandedItemId = if (isExpanded) null else routineExercise.id
                             },
                             onDismissToStart = {
                                 // Remove the RoutineExercise from the editedExerciseList
@@ -362,51 +366,108 @@ fun RoutineItemEditScreen(
                                 }.toPersistentList()
                             },
                             trailingContent = {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.padding(end = 8.dp)
-                                ) {
-                                    IconButton(
-                                        onClick = {
-                                            // Decrement repetitions count
-                                            val updatedRepetitions =
-                                                (routineExercise.repetitions - 1).coerceAtLeast(1)
-                                            val updatedRoutineExercise =
-                                                routineExercise.copy(repetitions = updatedRepetitions)
-                                            editedExerciseList = editedExerciseList.map {
-                                                if (it.id == routineExercise.id) updatedRoutineExercise else it
-                                            }.toPersistentList()
-                                        }
+                                if (isExpanded) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.padding(end = 8.dp)
                                     ) {
-                                        Icon(
-                                            Icons.Default.Remove,
-                                            contentDescription = "Decrease repetitions"
-                                        )
-                                    }
+                                        val buttonModifier = Modifier.width(30.dp)
 
-                                    Text(
-                                        text = routineExercise.repetitions.toString(),
-                                        textAlign = TextAlign.Center,
-                                        modifier = Modifier
-                                            .width(24.dp)
-                                    )
-
-                                    IconButton(
-                                        onClick = {
-                                            // Increment repetitions count
-                                            val updatedRepetitions =
-                                                (routineExercise.repetitions + 1).coerceAtMost(99)
-                                            val updatedRoutineExercise =
-                                                routineExercise.copy(repetitions = updatedRepetitions)
-                                            editedExerciseList = editedExerciseList.map {
-                                                if (it.id == routineExercise.id) updatedRoutineExercise else it
-                                            }.toPersistentList()
+                                        IconButton(
+                                            modifier = buttonModifier,
+                                            onClick = {
+                                                // Decrement repetitions count
+                                                val updatedRepetitions =
+                                                    (routineExercise.repetitions - 1).coerceAtLeast(
+                                                        1
+                                                    )
+                                                val updatedRoutineExercise =
+                                                    routineExercise.copy(repetitions = updatedRepetitions)
+                                                editedExerciseList = editedExerciseList.map {
+                                                    if (it.id == routineExercise.id) updatedRoutineExercise else it
+                                                }.toPersistentList()
+                                            }
+                                        ) {
+                                            Icon(
+                                                Icons.Default.Remove,
+                                                contentDescription = "Decrease repetitions"
+                                            )
                                         }
-                                    ) {
-                                        Icon(
-                                            Icons.Default.Add,
-                                            contentDescription = "Increase repetitions"
+
+                                        Text(
+                                            text = routineExercise.repetitions.toString(),
+                                            textAlign = TextAlign.Center,
+                                            modifier = Modifier
+                                                .width(24.dp)
                                         )
+
+                                        IconButton(
+                                            modifier = buttonModifier,
+                                            onClick = {
+                                                // Increment repetitions count
+                                                val updatedRepetitions =
+                                                    (routineExercise.repetitions + 1).coerceAtMost(
+                                                        99
+                                                    )
+                                                val updatedRoutineExercise =
+                                                    routineExercise.copy(repetitions = updatedRepetitions)
+                                                editedExerciseList = editedExerciseList.map {
+                                                    if (it.id == routineExercise.id) updatedRoutineExercise else it
+                                                }.toPersistentList()
+                                            }
+                                        ) {
+                                            Icon(
+                                                Icons.Default.Add,
+                                                contentDescription = "Increase repetitions"
+                                            )
+                                        }
+
+                                        Spacer(modifier = Modifier.width(8.dp))
+
+
+                                        IconButton(
+                                            modifier = buttonModifier,
+                                            onClick = {
+                                                val currentIndex =
+                                                    editedExerciseList.indexOf(routineExercise)
+                                                if (currentIndex > 0) {
+                                                    editedExerciseList =
+                                                        editedExerciseList.toMutableList().apply {
+                                                            add(
+                                                                currentIndex - 1,
+                                                                removeAt(currentIndex)
+                                                            )
+                                                        }.toPersistentList()
+                                                }
+                                            }
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.ArrowUpward,
+                                                contentDescription = "Move Up"
+                                            )
+                                        }
+
+                                        IconButton(
+                                            modifier = buttonModifier,
+                                            onClick = {
+                                                val currentIndex =
+                                                    editedExerciseList.indexOf(routineExercise)
+                                                if (currentIndex < editedExerciseList.lastIndex) {
+                                                    editedExerciseList =
+                                                        editedExerciseList.toMutableList().apply {
+                                                            add(
+                                                                currentIndex + 1,
+                                                                removeAt(currentIndex)
+                                                            )
+                                                        }.toPersistentList()
+                                                }
+                                            }
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.ArrowDownward,
+                                                contentDescription = "Move Down"
+                                            )
+                                        }
                                     }
                                 }
                             }
