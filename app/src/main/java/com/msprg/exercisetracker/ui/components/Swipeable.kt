@@ -2,6 +2,7 @@ package com.msprg.exerciseTracker.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
@@ -52,16 +53,31 @@ fun <T> SwipeToDeleteContainer(
 
     LaunchedEffect(key1 = isDismissedToStart) {
         if (isDismissedToStart) {
-            delay(animationDuration.toLong())
+            delay(animationDuration.toLong() - 250) //shit's bugged https://issuetracker.google.com/issues/240599812
             DismissToStartAction(item)
         }
     }
     AnimatedVisibility(
         visible = !isDismissedToStart,
+        enter = expandVertically(
+            animationSpec = tween(durationMillis = animationDuration),
+            expandFrom = Alignment.Top
+        ),
         exit = shrinkVertically(
             animationSpec = tween(durationMillis = animationDuration),
             shrinkTowards = Alignment.Top
         ) + fadeOut()
+//
+//        exit = shrinkHorizontally(
+//            animationSpec = tween(durationMillis = animationDuration),
+//            shrinkTowards = Alignment.Start
+//        ) + fadeOut()
+
+//        exit = shrinkVertically(
+//            animationSpec = tween(durationMillis = animationDuration),
+//            shrinkTowards = Alignment.Top
+//        ) + fadeOut()
+
     ) {
         SwipeToDismiss(
             state = state,
