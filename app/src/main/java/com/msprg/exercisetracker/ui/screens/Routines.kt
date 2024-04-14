@@ -261,7 +261,6 @@ fun RoutineItemEditScreen(
     val exerciseData by viewModel.exerciseDataFlow.collectAsState(initial = ExercisesList())
 
     var editedTitle by remember { mutableStateOf(routineItem?.routineTitle ?: "") }
-//    val editedDescription by remember { mutableStateOf(routineItem?.routineDescription ?: "") }
     var editedExerciseList by remember {
         mutableStateOf(
             routineItem?.exerciseList ?: persistentListOf()
@@ -290,7 +289,6 @@ fun RoutineItemEditScreen(
                     val updatedRoutineItem = RoutineItem(
                         id = routineItem?.id ?: UUID.randomUUID().toString(),
                         routineTitle = editedTitle,
-//                        routineDescription = editedDescription,
                         exerciseList = editedExerciseList,
                     )
                     onSavePressed(updatedRoutineItem)
@@ -501,6 +499,7 @@ fun RoutineItemEditScreen(
                     repetitions = 1 // one by default
                 )
                 editedExerciseList = editedExerciseList.add(newRoutineExercise)
+                expandedItemId = newRoutineExercise.id
             },
             onDismiss = {
                 showExerciseSelectionDialog = false
