@@ -2,6 +2,7 @@ package com.msprg.exerciseTracker.ui.screens
 
 import android.content.res.Configuration
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -78,7 +79,9 @@ import com.msprg.exerciseTracker.ui.theme.ExerciseTrackerTheme
 import com.msprg.exerciseTracker.ui.viewmodels.RoutinesViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import java.util.UUID
 
 
@@ -190,7 +193,9 @@ fun PlayRoutineScreen(
         }
 
         Log.d("185", "End of routine")
-        onRoutineFinished()
+        withContext(Dispatchers.Main) {
+            onRoutineFinished()
+        }
     }
 
     Column(
