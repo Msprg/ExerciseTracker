@@ -88,9 +88,11 @@ import java.util.UUID
 @Composable
 fun RoutinesScreen(
     navCtl: NavController,
-    viewModel: RoutinesViewModel = RoutinesViewModel(ExTrApplication.datastoremodule)
+    viewModel: RoutinesViewModel = RoutinesViewModel(ExTrApplication.datastoremodule),
+    mainViewModel: MainActivityViewModel = MainActivityViewModel(ExTrApplication.datastoremodule)
 ) {
     val routinesData by viewModel.routinesDataFlow.collectAsState(initial = RoutinesList())
+    val exerciseData by mainViewModel.exerciseDataFlow.collectAsState(initial = ExercisesList())
 
     Scaffold(
         floatingActionButton = {
@@ -133,7 +135,25 @@ fun RoutinesScreen(
                     trailingContent = {
                         IconButton(
                             onClick = {
-                                navCtl.navigate("${Screens.PlayRoutineScreen.name}/${routineItem.id}")
+                                val verifiedExerciseList = VerifyDataLinkageIntegrity(
+                                    listOf(routineItem),
+                                    exerciseData.excList
+                                ).firstOrNull()?.exerciseList
+                                if (verifiedExerciseList != null && verifiedExerciseList.isNotEmpty()) {
+                                    navCtl.navigate("${Screens.PlayRoutineScreen.name}/${routineItem.id}")
+                                } else {
+                                    // Display a toast with an error message
+                                    Toast.makeText(
+                                        ExTrApplication.appContext,
+                                        "Cannot play empty routine",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    Toast.makeText(
+                                        ExTrApplication.appContext,
+                                        "Tap on the routine to add some exercises",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
                             },
                             modifier = Modifier.padding(end = 8.dp)
                         ) {
@@ -253,6 +273,17 @@ fun PlayRoutineScreen(
     }
 }
 
+fun VerifyDataLinkageIntegrity(
+    routines: List<RoutineItem>,
+    exercises: List<ExerciseItem>
+): List<RoutineItem> {
+    return routines.map { routine ->
+        val updatedExerciseList = routine.exerciseList.filter { routineExercise ->
+            exercises.any { it.id == routineExercise.exerciseId }
+        }
+        routine.copy(exerciseList = updatedExerciseList.toPersistentList())
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -261,15 +292,36 @@ fun RoutineItemEditScreen(
     onBackPressed: () -> Unit,
     onSavePressed: (RoutineItem) -> Unit,
     viewModel: MainActivityViewModel = MainActivityViewModel(ExTrApplication.datastoremodule)
-
 ) {
     val exerciseData by viewModel.exerciseDataFlow.collectAsState(initial = ExercisesList())
-
     var editedTitle by remember { mutableStateOf(routineItem?.routineTitle ?: "") }
     var editedExerciseList by remember {
         mutableStateOf(
             routineItem?.exerciseList ?: persistentListOf()
         )
+    }
+//    SideEffect {
+//        if (editedExerciseList.size != 0) {
+//            val verifiedExerciseList = VerifyDataLinkageIntegrity(
+//                listOf(RoutineItem(exerciseList = editedExerciseList)),
+//                exerciseData.excList
+//            ).firstOrNull()?.exerciseList
+//            if (verifiedExerciseList != null) {
+//                editedExerciseList = verifiedExerciseList
+//            }
+//        }
+//    }
+
+    LaunchedEffect(exerciseData) {
+        if (editedExerciseList.isNotEmpty()) {
+            val verifiedExerciseList = VerifyDataLinkageIntegrity(
+                listOf(RoutineItem(exerciseList = editedExerciseList)),
+                exerciseData.excList
+            ).firstOrNull()?.exerciseList
+            if (verifiedExerciseList != null) {
+                editedExerciseList = verifiedExerciseList
+            }
+        }
     }
 
     var expandedItemId by remember { mutableStateOf<String?>(null) }
