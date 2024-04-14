@@ -532,16 +532,33 @@ fun ExerciseSelectionDialog(
 
             LazyColumn {
                 items(exercises) { exercise ->
-                    Text(
-                        text = exercise.exTitle,
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
                                 onExerciseSelected(exercise)
                                 onDismiss()
                             }
-                            .padding(vertical = 8.dp)
-                    )
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        val iconMod = Modifier.size(24.dp)
+                        when (val icon = exercise.icon) {
+                            is ExerciseIcon.DefaultIcon -> DefaultVectorIcon(
+                                modifier = iconMod
+                            )
+
+                            is ExerciseIcon.RasterIcon -> RasterIcon(
+                                modifier = iconMod,
+                                base64String = icon.imageBase64
+                            )
+                        }
+                        Text(
+                            text = exercise.exTitle,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
                 }
             }
         }
