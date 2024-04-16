@@ -76,11 +76,30 @@ import java.io.ByteArrayOutputStream
 import java.util.UUID
 
 object ImageUtils {
+    private const val MAX_RESOLUTION = 1024
+
     fun encodeImageToBase64(bitmap: Bitmap): String {
+        val scaledBitmap = scaleDownBitmap(bitmap, MAX_RESOLUTION)
         val byteArrayOutputStream = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 70, byteArrayOutputStream)
+        scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 70, byteArrayOutputStream)
         val byteArray = byteArrayOutputStream.toByteArray()
         return Base64.encodeToString(byteArray, Base64.DEFAULT)
+    }
+
+    private fun scaleDownBitmap(bitmap: Bitmap, maxResolution: Int): Bitmap {
+        val width = bitmap.width
+        val height = bitmap.height
+
+        val scale = maxResolution.toFloat() / maxOf(width, height)
+
+        if (scale >= 1f) {
+            return bitmap
+        }
+
+        val scaledWidth = (width * scale).toInt()
+        val scaledHeight = (height * scale).toInt()
+
+        return Bitmap.createScaledBitmap(bitmap, scaledWidth, scaledHeight, true)
     }
 
     fun decodeBase64ToImage(encodedString: String): Bitmap {
