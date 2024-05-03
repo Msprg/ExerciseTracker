@@ -1,6 +1,5 @@
 package com.msprg.exerciseTracker.ui.navigation
 
-import android.content.res.Configuration
 import android.widget.Toast
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
@@ -12,7 +11,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
@@ -22,7 +20,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.msprg.exerciseTracker.ExTrApplication
-import com.msprg.exerciseTracker.MainActivityViewModel
 import com.msprg.exerciseTracker.data.ExercisesList
 import com.msprg.exerciseTracker.data.RoutinesList
 import com.msprg.exerciseTracker.ui.screens.ExerciseItemEditScreen
@@ -33,13 +30,13 @@ import com.msprg.exerciseTracker.ui.screens.PlayRoutineScreen
 import com.msprg.exerciseTracker.ui.screens.RoutineItemEditScreen
 import com.msprg.exerciseTracker.ui.screens.RoutinesScreen
 import com.msprg.exerciseTracker.ui.screens.ScheduleScreen
-import com.msprg.exerciseTracker.ui.theme.ExerciseTrackerTheme
+import com.msprg.exerciseTracker.ui.viewmodels.ExercisesViewModel
 import com.msprg.exerciseTracker.ui.viewmodels.RoutinesViewModel
 
 @Composable
 fun AppNavCtl(
-    startingScreen: Screens = Screens.RoutinesScreen,
-    viewModel: MainActivityViewModel = MainActivityViewModel(ExTrApplication.datastoremodule),
+    startingScreen: Screens = Screens.HistoryScreen,
+    viewModel: ExercisesViewModel = ExercisesViewModel(ExTrApplication.datastoremodule),
     routinesViewModel: RoutinesViewModel = RoutinesViewModel(ExTrApplication.datastoremodule)
 ) {
     val navController = rememberNavController()
@@ -182,6 +179,7 @@ fun AppNavCtl(
                 val routineItem = routinesData.routineList.find { it.id == routineItemId }
                 if (routineItem != null) {
                     PlayRoutineScreen(
+                        routineItem = routineItem,
                         exerciseList = routineItem.exerciseList,
                         onRoutineFinished = { navController.popBackStack() }
                     )
@@ -196,13 +194,5 @@ fun AppNavCtl(
             }
         }
 
-    }
-}
-
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-fun AppNavCtlPrew() {
-    ExerciseTrackerTheme {
-        AppNavCtl()
     }
 }

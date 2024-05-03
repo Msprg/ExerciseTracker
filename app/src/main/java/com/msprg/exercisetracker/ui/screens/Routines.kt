@@ -1,6 +1,5 @@
 package com.msprg.exerciseTracker.ui.screens
 
-import android.content.res.Configuration
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -59,13 +58,11 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import com.msprg.exerciseTracker.ExTrApplication
-import com.msprg.exerciseTracker.MainActivityViewModel
 import com.msprg.exerciseTracker.data.ExerciseIcon
 import com.msprg.exerciseTracker.data.ExerciseItem
 import com.msprg.exerciseTracker.data.ExercisesList
@@ -73,9 +70,8 @@ import com.msprg.exerciseTracker.data.RoutineExercise
 import com.msprg.exerciseTracker.data.RoutineItem
 import com.msprg.exerciseTracker.data.RoutinesList
 import com.msprg.exerciseTracker.ui.components.RowItem
-import com.msprg.exerciseTracker.ui.navigation.AppNavCtl
 import com.msprg.exerciseTracker.ui.navigation.Screens
-import com.msprg.exerciseTracker.ui.theme.ExerciseTrackerTheme
+import com.msprg.exerciseTracker.ui.viewmodels.ExercisesViewModel
 import com.msprg.exerciseTracker.ui.viewmodels.HistoryViewModel
 import com.msprg.exerciseTracker.ui.viewmodels.RoutinesViewModel
 import kotlinx.collections.immutable.persistentListOf
@@ -90,7 +86,7 @@ import java.util.UUID
 fun RoutinesScreen(
     navCtl: NavController,
     viewModel: RoutinesViewModel = RoutinesViewModel(ExTrApplication.datastoremodule),
-    mainViewModel: MainActivityViewModel = MainActivityViewModel(ExTrApplication.datastoremodule)
+    mainViewModel: ExercisesViewModel = ExercisesViewModel(ExTrApplication.datastoremodule)
 ) {
     val routinesData by viewModel.routinesDataFlow.collectAsState(initial = RoutinesList())
     val exerciseData by mainViewModel.exerciseDataFlow.collectAsState(initial = ExercisesList())
@@ -126,7 +122,7 @@ fun RoutinesScreen(
                         )
                     },
                     title = routineItem.routineTitle,
-                    description = "${routineItem.id} ${routineItem.routineDescription}",
+                    description = routineItem.routineDescription,
                     onClick = {
                         navCtl.navigate("${Screens.RoutineItemEditScreen.name}/${routineItem.id}")
                     },
@@ -177,7 +173,7 @@ fun PlayRoutineScreen(
     routineItem: RoutineItem,
     exerciseList: List<RoutineExercise>,
     onRoutineFinished: () -> Unit,
-    viewModel: MainActivityViewModel = MainActivityViewModel(ExTrApplication.datastoremodule),
+    viewModel: ExercisesViewModel = ExercisesViewModel(ExTrApplication.datastoremodule),
     historyViewModel: HistoryViewModel = HistoryViewModel(ExTrApplication.datastoremodule)
 ) {
     val exerciseData by viewModel.exerciseDataFlow.collectAsState(initial = ExercisesList())
@@ -315,7 +311,7 @@ fun RoutineItemEditScreen(
     routineItem: RoutineItem?,
     onBackPressed: () -> Unit,
     onSavePressed: (RoutineItem) -> Unit,
-    viewModel: MainActivityViewModel = MainActivityViewModel(ExTrApplication.datastoremodule)
+    viewModel: ExercisesViewModel = ExercisesViewModel(ExTrApplication.datastoremodule)
 ) {
     val exerciseData by viewModel.exerciseDataFlow.collectAsState(initial = ExercisesList())
     var editedTitle by remember { mutableStateOf(routineItem?.routineTitle ?: "") }
@@ -324,17 +320,6 @@ fun RoutineItemEditScreen(
             routineItem?.exerciseList ?: persistentListOf()
         )
     }
-//    SideEffect {
-//        if (editedExerciseList.size != 0) {
-//            val verifiedExerciseList = VerifyDataLinkageIntegrity(
-//                listOf(RoutineItem(exerciseList = editedExerciseList)),
-//                exerciseData.excList
-//            ).firstOrNull()?.exerciseList
-//            if (verifiedExerciseList != null) {
-//                editedExerciseList = verifiedExerciseList
-//            }
-//        }
-//    }
 
     LaunchedEffect(exerciseData) {
         if (editedExerciseList.isNotEmpty()) {
@@ -642,14 +627,5 @@ fun ExerciseSelectionDialog(
                 }
             }
         }
-    }
-}
-
-
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-fun RoutinesScreenPrew() {
-    ExerciseTrackerTheme {
-        AppNavCtl(Screens.RoutinesScreen)
     }
 }

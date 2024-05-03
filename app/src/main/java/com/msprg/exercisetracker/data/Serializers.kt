@@ -18,8 +18,6 @@ import java.io.InputStream
 import java.io.OutputStream
 
 @OptIn(ExperimentalSerializationApi::class)
-//@Serializer(forClass = PersistentList::class) //Hasn't worked for me
-//@kotlinx.serialization.Serializer(forClass = PersistentList::class)   //Works, but warns as redundant
 class PersistentListSerializer(
     private val serializer: KSerializer<String>,
 ) : KSerializer<PersistentList<String>> {

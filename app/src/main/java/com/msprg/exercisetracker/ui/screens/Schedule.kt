@@ -1,6 +1,5 @@
 package com.msprg.exerciseTracker.ui.screens
 
-import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,13 +15,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.msprg.exerciseTracker.ui.components.RowItemsMockup
-import com.msprg.exerciseTracker.ui.navigation.AppNavCtl
-import com.msprg.exerciseTracker.ui.navigation.Screens
-import com.msprg.exerciseTracker.ui.theme.ExerciseTrackerTheme
 
 @Composable
 fun ScheduleScreen(navCtl: NavController) {
@@ -54,21 +49,5 @@ fun ScheduleScreen(navCtl: NavController) {
             }
             )
         }
-    }
-}
-
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-fun ScheduleScreenPrew() {
-    ExerciseTrackerTheme {
-        AppNavCtl(Screens.ScheduleScreen)
-    }
-}
-
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-fun ScheduleScreenPrewWireframe() {
-    ExerciseTrackerTheme {
-        AppNavCtl(Screens.ScheduleScreen)
     }
 }

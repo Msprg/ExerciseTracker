@@ -79,8 +79,7 @@ fun RowItem(
 fun RowItemsMockup(
     modifier: Modifier = Modifier,
     howMany: Int = 50,
-//    icon: ImageVector = Icons.Outlined.Square,
-    icon: (@Composable () -> Unit)? = {
+    icon: @Composable (() -> Unit)? = {
         Icon(
             imageVector = Icons.Outlined.Square,
             contentDescription = null,
@@ -91,15 +90,13 @@ fun RowItemsMockup(
     },
     title: String = "MOCK_ITEM_TITLE",
     description: String = "MOCK_ITEM_DESCRIPTION",
-    trailingContent: (@Composable () -> Unit)? = null,
-    onClick: () -> Unit = {},
-    onButtonClick: () -> Unit = {}
+    trailingContent: @Composable (() -> Unit)? = null
 ) {
     LazyColumn(modifier = modifier) {
         items(howMany) { index ->
             RowItem(
                 icon = icon,
-                title = "$title $index AAAAAA",
+                title = "$title $index",
                 description = "$description $index",
                 trailingContent = trailingContent
             )

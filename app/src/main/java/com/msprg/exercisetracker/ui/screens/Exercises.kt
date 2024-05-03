@@ -1,9 +1,7 @@
 package com.msprg.exerciseTracker.ui.screens
 
-import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.util.Base64
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -58,60 +56,24 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import com.msprg.exerciseTracker.ExTrApplication
-import com.msprg.exerciseTracker.MainActivityViewModel
 import com.msprg.exerciseTracker.data.ExerciseIcon
 import com.msprg.exerciseTracker.data.ExerciseItem
 import com.msprg.exerciseTracker.data.ExercisesList
 import com.msprg.exerciseTracker.ui.components.RowItem
-import com.msprg.exerciseTracker.ui.navigation.AppNavCtl
 import com.msprg.exerciseTracker.ui.navigation.Screens
-import com.msprg.exerciseTracker.ui.theme.ExerciseTrackerTheme
-import java.io.ByteArrayOutputStream
+import com.msprg.exerciseTracker.ui.viewmodels.ExercisesViewModel
+import com.msprg.exerciseTracker.util.ImageUtils
 import java.util.UUID
-
-object ImageUtils {
-    private const val MAX_RESOLUTION = 1024
-
-    fun encodeImageToBase64(bitmap: Bitmap): String {
-        val scaledBitmap = scaleDownBitmap(bitmap, MAX_RESOLUTION)
-        val byteArrayOutputStream = ByteArrayOutputStream()
-        scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 70, byteArrayOutputStream)
-        val byteArray = byteArrayOutputStream.toByteArray()
-        return Base64.encodeToString(byteArray, Base64.DEFAULT)
-    }
-
-    private fun scaleDownBitmap(bitmap: Bitmap, maxResolution: Int): Bitmap {
-        val width = bitmap.width
-        val height = bitmap.height
-
-        val scale = maxResolution.toFloat() / maxOf(width, height)
-
-        if (scale >= 1f) {
-            return bitmap
-        }
-
-        val scaledWidth = (width * scale).toInt()
-        val scaledHeight = (height * scale).toInt()
-
-        return Bitmap.createScaledBitmap(bitmap, scaledWidth, scaledHeight, true)
-    }
-
-    fun decodeBase64ToImage(encodedString: String): Bitmap {
-        val decodedBytes = Base64.decode(encodedString, Base64.DEFAULT)
-        return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
-    }
-}
 
 @Composable
 fun ExercisesScreen(
     navCtl: NavController,
-    viewModel: MainActivityViewModel = MainActivityViewModel(ExTrApplication.datastoremodule)
+    viewModel: ExercisesViewModel = ExercisesViewModel(ExTrApplication.datastoremodule)
 ) {
     val exerciseData by viewModel.exerciseDataFlow.collectAsState(initial = ExercisesList())
 
@@ -149,7 +111,7 @@ fun ExercisesScreen(
                         }
                     },
                     title = exerciseItem.exTitle,
-                    description = "${exerciseItem.id} ${exerciseItem.exDescription}",
+                    description = exerciseItem.exDescription,
                     onClick = {
                         navCtl.navigate("${Screens.ExerciseItemViewScreen.name}/${exerciseItem.id}")
                     },
@@ -354,34 +316,6 @@ fun ExerciseItemEditScreen(
     }
 
     Scaffold(
-//        topBar = {
-//            TopAppBar(
-//                title = {
-//                    OutlinedTextField(
-//                        value = textFieldValue,
-//                        onValueChange = {
-//                            textFieldValue = it
-//                            editedTitle = it.text
-//                        },
-//                        label = { Text("Title") },
-//                        singleLine = true,
-//                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-//                        keyboardActions = KeyboardActions(onDone = {
-//                            focusManager.clearFocus()
-//                            keyboardController?.hide()
-//                        }),
-//                        modifier = Modifier
-//                            .focusRequester(focusRequester)
-//                            .fillMaxWidth()
-//                    )
-//                },
-//                navigationIcon = {
-//                    IconButton(onClick = onBackPressed) {
-//                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-//                    }
-//                }
-//            )
-//        },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
@@ -477,14 +411,5 @@ fun ExerciseItemEditScreen(
                     .padding(8.dp)
             )
         }
-    }
-}
-
-
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-fun ExercisesScreenPrew() {
-    ExerciseTrackerTheme {
-        AppNavCtl(Screens.ExercisesScreen)
     }
 }

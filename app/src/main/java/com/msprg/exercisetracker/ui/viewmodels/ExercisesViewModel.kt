@@ -1,4 +1,4 @@
-package com.msprg.exerciseTracker
+package com.msprg.exerciseTracker.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,7 +11,7 @@ import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
-class MainActivityViewModel(
+class ExercisesViewModel(
     private val dsModule: IFDataStoreModule
 ) : ViewModel() {
     val exerciseDataFlow: Flow<ExercisesList> = dsModule.exercisesDS.data
