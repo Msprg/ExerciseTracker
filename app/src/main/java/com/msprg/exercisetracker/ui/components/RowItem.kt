@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Square
+import androidx.compose.material3.DismissDirection
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -23,7 +25,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun RowItem(
     modifier: Modifier = Modifier,
@@ -40,12 +42,25 @@ fun RowItem(
     description: String = "RowItemDescription",
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
-    onDismissToStart: () -> Unit = {},
+    onDismissToStart: (() -> Unit)? = null,
+    onDismissToEnd: (() -> Unit)? = null,
     trailingContent: (@Composable () -> Unit)? = null
 ) {
-    SwipeToDeleteContainer(
+    // Apply appropriate dismiss directions based on onDismissToStart and onDismissToEnd
+    val dismissDirections = mutableSetOf<DismissDirection>().apply {
+        if (onDismissToStart != null) {
+            add(DismissDirection.EndToStart)
+        }
+        if (onDismissToEnd != null) {
+            add(DismissDirection.StartToEnd)
+        }
+    }
+
+    SwipeToDismissContainer(
         item = Unit,
-        DismissToStartAction = { onDismissToStart() }
+        dismissDirections = dismissDirections,
+        dismissToStartAction = { onDismissToStart?.invoke() },
+        dismissToEndAction = { onDismissToEnd?.invoke() }
     ) {
         Row(
             modifier = modifier

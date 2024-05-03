@@ -33,20 +33,30 @@ import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun <T> SwipeToDeleteContainer(
+fun <T> SwipeToDismissContainer(
     item: T,
-    DismissToStartAction: (T) -> Unit,
+    dismissDirections: Set<DismissDirection>,
+    dismissToStartAction: (T) -> Unit,
+    dismissToEndAction: (T) -> Unit,
     animationDuration: Int = 500,
     content: @Composable (T) -> Unit
 ) {
     var isDismissedToStart by remember { mutableStateOf(false) }
+    var isDismissedToEnd by remember { mutableStateOf(false) }
     val state = rememberDismissState(
         confirmValueChange = { value ->
-            if (value == DismissValue.DismissedToStart) {
-                isDismissedToStart = true
-                true
-            } else {
-                false
+            when (value) {
+                DismissValue.DismissedToStart -> {
+                    isDismissedToStart = true
+                    true
+                }
+
+                DismissValue.DismissedToEnd -> {
+                    isDismissedToEnd = true
+                    true
+                }
+
+                else -> false
             }
         }
     )
@@ -54,11 +64,19 @@ fun <T> SwipeToDeleteContainer(
     LaunchedEffect(key1 = isDismissedToStart) {
         if (isDismissedToStart) {
             delay(animationDuration.toLong() - 250) //shit's bugged https://issuetracker.google.com/issues/240599812
-            DismissToStartAction(item)
+            dismissToStartAction(item)
         }
     }
+
+    LaunchedEffect(key1 = isDismissedToEnd) {
+        if (isDismissedToEnd) {
+            delay(animationDuration.toLong() - 250)
+            dismissToEndAction(item)
+        }
+    }
+
     AnimatedVisibility(
-        visible = !isDismissedToStart,
+        visible = !isDismissedToStart && !isDismissedToEnd,
         enter = expandVertically(
             animationSpec = tween(durationMillis = animationDuration),
             expandFrom = Alignment.Top
@@ -85,7 +103,7 @@ fun <T> SwipeToDeleteContainer(
                 DismissBackground(swipeDismissState = state)
             },
             dismissContent = { content(item) },
-            directions = setOf(DismissDirection.EndToStart)
+            directions = dismissDirections
         )
     }
 }
