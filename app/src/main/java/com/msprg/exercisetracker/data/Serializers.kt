@@ -94,5 +94,28 @@ object PersistRoutinesListSerializer : Serializer<RoutinesList> {
 }
 
 
+object PersistHistoryListSerializer : Serializer<HistoryList> {
+    override val defaultValue: HistoryList
+        get() = HistoryList()
 
+    override suspend fun readFrom(input: InputStream): HistoryList {
+        return try {
+            Json.decodeFromString(
+                deserializer = HistoryList.serializer(),
+                string = input.readBytes().decodeToString()
+            )
+        } catch (e: SerializationException) {
+            e.printStackTrace()
+            defaultValue
+        }
+    }
 
+    override suspend fun writeTo(t: HistoryList, output: OutputStream) {
+        output.write(
+            Json.encodeToString(
+                serializer = HistoryList.serializer(),
+                value = t
+            ).encodeToByteArray()
+        )
+    }
+}

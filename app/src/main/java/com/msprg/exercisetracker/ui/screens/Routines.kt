@@ -76,6 +76,7 @@ import com.msprg.exerciseTracker.ui.components.RowItem
 import com.msprg.exerciseTracker.ui.navigation.AppNavCtl
 import com.msprg.exerciseTracker.ui.navigation.Screens
 import com.msprg.exerciseTracker.ui.theme.ExerciseTrackerTheme
+import com.msprg.exerciseTracker.ui.viewmodels.HistoryViewModel
 import com.msprg.exerciseTracker.ui.viewmodels.RoutinesViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
@@ -173,9 +174,11 @@ fun RoutinesScreen(
 
 @Composable
 fun PlayRoutineScreen(
+    routineItem: RoutineItem,
     exerciseList: List<RoutineExercise>,
     onRoutineFinished: () -> Unit,
-    viewModel: MainActivityViewModel = MainActivityViewModel(ExTrApplication.datastoremodule)
+    viewModel: MainActivityViewModel = MainActivityViewModel(ExTrApplication.datastoremodule),
+    historyViewModel: HistoryViewModel = HistoryViewModel(ExTrApplication.datastoremodule)
 ) {
     val exerciseData by viewModel.exerciseDataFlow.collectAsState(initial = ExercisesList())
     var currentExerciseIndex by remember { mutableStateOf(0) }
@@ -186,12 +189,24 @@ fun PlayRoutineScreen(
     var progress by remember { mutableStateOf(0f) }
 
     LaunchedEffect(Unit) {
+        var historyItemId: String? = null
+
         while (currentExerciseIndex < exerciseList.size) {
             val currentExercise = exerciseList.getOrNull(currentExerciseIndex)
             val exercise =
                 currentExercise?.let { exerciseData.excList.find { it.id == currentExercise.exerciseId } }
 
             if (exercise != null) {
+                if (historyItemId == null) {
+                    // Add a new history item with unfinished state
+                    historyItemId = historyViewModel.addHistoryItem(
+                        routineId = routineItem.id,
+                        routineTitle = routineItem.routineTitle,
+                        startTime = System.currentTimeMillis(),
+                        endTime = 0L,
+                        completed = false
+                    )
+                }
                 val exerciseDuration =
                     exercise.durationSeconds * 1000L * currentExercise.repetitions
                 Log.d("170", "Waiting for $exerciseDuration")
@@ -210,6 +225,15 @@ fun PlayRoutineScreen(
             }
 
             currentExerciseIndex++
+        }
+
+        historyItemId?.let { id ->
+            // Update the history item with finished state
+            historyViewModel.updateHistoryItem(
+                id = id,
+                endTime = System.currentTimeMillis(),
+                completed = true
+            )
         }
 
         Log.d("185", "End of routine")
