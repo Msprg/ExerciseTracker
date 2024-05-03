@@ -17,8 +17,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -28,6 +30,7 @@ import com.msprg.exerciseTracker.ExTrApplication
 import com.msprg.exerciseTracker.ui.components.RowItem
 import com.msprg.exerciseTracker.ui.viewmodels.HistoryViewModel
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Locale
 
 
@@ -39,6 +42,28 @@ fun HistoryScreen(
 ) {
     val historyItems by viewModel.historyItems.collectAsState()
 
+    // Get the current date
+    val currentDate = remember {
+        Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+            add(Calendar.DATE, 1) // For some reason it's giving me the previous day
+        }.timeInMillis
+    }
+
+    // Initialize the date picker state with the current date
+    val datePickerState = rememberDatePickerState(initialSelectedDateMillis = currentDate)
+    val selectedDate = datePickerState.selectedDateMillis ?: currentDate
+
+    var filteredHistoryItems = viewModel.getHistoryItemsForDate(selectedDate)
+    LaunchedEffect(historyItems) {
+        if (historyItems.isNotEmpty()) {
+            filteredHistoryItems = viewModel.getHistoryItemsForDate(selectedDate)
+        }
+    }
+
     Scaffold(modifier = Modifier.fillMaxSize(),
         content = { paddingValues ->
             Column(
@@ -48,7 +73,6 @@ fun HistoryScreen(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                val datePickerState = rememberDatePickerState()
                 DatePicker(
                     state = datePickerState,
                     modifier = Modifier.padding(16.dp),
@@ -57,7 +81,11 @@ fun HistoryScreen(
                     showModeToggle = false
                 )
                 Text(
-                    "Selected date timestamp: ${datePickerState.selectedDateMillis ?: "no selection"}",
+                    "Selected date: ${
+                        SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(
+                            selectedDate
+                        )
+                    }",
                     modifier = Modifier
                         .padding(start = 16.dp)
                         .align(Alignment.Start),
@@ -65,7 +93,7 @@ fun HistoryScreen(
                 )
                 Box(modifier = Modifier.weight(1f)) {
                     LazyColumn {
-                        items(historyItems, key = { it.id }) { historyItem ->
+                        items(filteredHistoryItems, key = { it.id }) { historyItem ->
                             val localizedStartTime = SimpleDateFormat(
                                 "HH:mm",
                                 Locale.getDefault()
