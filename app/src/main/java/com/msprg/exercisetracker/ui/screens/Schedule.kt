@@ -15,8 +15,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.msprg.exerciseTracker.R
 import com.msprg.exerciseTracker.ui.components.RowItemsMockup
 
 @Composable
@@ -27,7 +29,7 @@ fun ScheduleScreen(navCtl: NavController) {
                 onClick = { },
                 shape = CircleShape
             ) {
-                Icon(Icons.Rounded.Verified, contentDescription = "Add")
+                Icon(Icons.Rounded.Verified, contentDescription = stringResource(R.string.add))
             }
         }
     ) { innerPadding ->

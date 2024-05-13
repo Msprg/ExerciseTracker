@@ -23,10 +23,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.msprg.exerciseTracker.ExTrApplication
+import com.msprg.exerciseTracker.R
 import com.msprg.exerciseTracker.ui.components.RowItem
 import com.msprg.exerciseTracker.ui.viewmodels.HistoryViewModel
 import java.text.SimpleDateFormat
@@ -81,11 +83,12 @@ fun HistoryScreen(
                     showModeToggle = false
                 )
                 Text(
-                    "Selected date: ${
+                    stringResource(
+                        R.string.selected_date,
                         SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(
                             selectedDate
                         )
-                    }",
+                    ),
                     modifier = Modifier
                         .padding(start = 16.dp)
                         .align(Alignment.Start),
@@ -106,9 +109,13 @@ fun HistoryScreen(
                                 val duration = historyItem.endTime - historyItem.startTime
                                 val minutes = duration / 60000
                                 val seconds = (duration % 60000) / 1000
-                                "Duration: ${minutes}m ${seconds}s"
+                                ExTrApplication.appContext.getString(
+                                    R.string.duration_m_s,
+                                    minutes,
+                                    seconds
+                                )
                             } else {
-                                "Routine not finished"
+                                ExTrApplication.appContext.getString(R.string.routine_not_finished)
                             }
 
                             RowItem(
@@ -122,7 +129,12 @@ fun HistoryScreen(
                                     )
                                 },
                                 title = historyItem.routineTitle,
-                                description = "Start: $localizedStartTime $localizedDate\n$durationText",
+                                description = ExTrApplication.appContext.getString(
+                                    R.string.start,
+                                    localizedStartTime,
+                                    localizedDate,
+                                    durationText
+                                ),
                             )
                         }
                     }

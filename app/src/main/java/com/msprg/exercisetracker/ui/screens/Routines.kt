@@ -55,6 +55,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
@@ -64,6 +65,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import com.msprg.exerciseTracker.ExTrApplication
+import com.msprg.exerciseTracker.R
 import com.msprg.exerciseTracker.data.ExerciseIcon
 import com.msprg.exerciseTracker.data.ExerciseItem
 import com.msprg.exerciseTracker.data.ExercisesList
@@ -100,7 +102,7 @@ fun RoutinesScreen(
                 },
                 shape = CircleShape
             ) {
-                Icon(Icons.Rounded.Add, contentDescription = "Add")
+                Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.add))
             }
         }
     ) { innerPadding ->
@@ -143,12 +145,12 @@ fun RoutinesScreen(
                                     // Display a toast with an error message
                                     Toast.makeText(
                                         ExTrApplication.appContext,
-                                        "Cannot play empty routine",
+                                        ExTrApplication.appContext.getString(R.string.cannot_play_empty_routine),
                                         Toast.LENGTH_SHORT
                                     ).show()
                                     Toast.makeText(
                                         ExTrApplication.appContext,
-                                        "Tap on the routine to add some exercises",
+                                        ExTrApplication.appContext.getString(R.string.tap_on_the_routine_to_add_some_exercises),
                                         Toast.LENGTH_LONG
                                     ).show()
                                 }
@@ -158,7 +160,7 @@ fun RoutinesScreen(
                             Icon(
                                 imageVector = Icons.Filled.PlayArrow,
                                 tint = Color.Green,
-                                contentDescription = "Play",
+                                contentDescription = stringResource(R.string.play),
                                 modifier = Modifier.size(55.dp)
                             )
                         }
@@ -217,7 +219,13 @@ fun PlayRoutineScreen(
                 progress = 1f // Ensure progress reaches 100% at the end of the exercise
             } else {
                 if (currentExercise != null) {
-                    Log.d("182", "Exercise ${currentExercise.exerciseId} not found. Skipping...")
+                    Log.d(
+                        "182",
+                        ExTrApplication.appContext.getString(
+                            R.string.exercise_not_found_skipping,
+                            currentExercise.exerciseId
+                        )
+                    )
                 }
             }
 
@@ -233,7 +241,7 @@ fun PlayRoutineScreen(
             )
         }
 
-        Log.d("185", "End of routine")
+        Log.d("185", ExTrApplication.appContext.getString(R.string.end_of_routine))
         withContext(Dispatchers.Main) {
             onRoutineFinished()
         }
@@ -276,7 +284,11 @@ fun PlayRoutineScreen(
             }
 
             Text(
-                text = "Duration: ${exercise.durationSeconds} seconds, Repetitions: ${currentExercise.repetitions}",
+                text = stringResource(
+                    R.string.duration_seconds_repetitions,
+                    exercise.durationSeconds,
+                    currentExercise.repetitions
+                ),
                 style = MaterialTheme.typography.bodyLarge
             )
 
@@ -360,7 +372,7 @@ fun RoutineItemEditScreen(
                 },
                 shape = CircleShape
             ) {
-                Icon(Icons.Rounded.Check, contentDescription = "Save")
+                Icon(Icons.Rounded.Check, contentDescription = stringResource(R.string.save))
             }
         }
     ) { innerPadding ->
@@ -375,7 +387,7 @@ fun RoutineItemEditScreen(
                     textFieldValue = it
                     editedTitle = it.text
                 },
-                label = { Text("Title") },
+                label = { Text(stringResource(R.string.title)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(onDone = {
@@ -416,8 +428,14 @@ fun RoutineItemEditScreen(
                                 }
                             },
                             title = exercise?.exTitle ?: "",
-                            description = "Duration: ${exercise?.durationSeconds ?: 10}, " +
-                                    "Repetitions: ${routineExercise.repetitions}" +
+                            description = ExTrApplication.appContext.getString(
+                                R.string.duration,
+                                exercise?.durationSeconds ?: 10
+                            ) +
+                                    ExTrApplication.appContext.getString(
+                                        R.string.repetitions,
+                                        routineExercise.repetitions
+                                    ) +
                                     "\n ${exercise?.exDescription}",
                             onClick = {
                                 expandedItemId = if (isExpanded) null else routineExercise.id
@@ -453,7 +471,7 @@ fun RoutineItemEditScreen(
                                         ) {
                                             Icon(
                                                 Icons.Default.Remove,
-                                                contentDescription = "Decrease repetitions"
+                                                contentDescription = stringResource(R.string.decrease_repetitions)
                                             )
                                         }
 
@@ -481,7 +499,7 @@ fun RoutineItemEditScreen(
                                         ) {
                                             Icon(
                                                 Icons.Default.Add,
-                                                contentDescription = "Increase repetitions"
+                                                contentDescription = stringResource(R.string.increase_repetitions)
                                             )
                                         }
 
@@ -506,7 +524,7 @@ fun RoutineItemEditScreen(
                                         ) {
                                             Icon(
                                                 imageVector = Icons.Default.ArrowUpward,
-                                                contentDescription = "Move Up"
+                                                contentDescription = stringResource(R.string.move_up)
                                             )
                                         }
 
@@ -528,7 +546,7 @@ fun RoutineItemEditScreen(
                                         ) {
                                             Icon(
                                                 imageVector = Icons.Default.ArrowDownward,
-                                                contentDescription = "Move Down"
+                                                contentDescription = stringResource(R.string.move_down)
                                             )
                                         }
                                     }
@@ -546,11 +564,11 @@ fun RoutineItemEditScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Add Exercise",
+                    contentDescription = stringResource(R.string.add_exercise),
                     modifier = Modifier.size(24.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Add Exercise")
+                Text(stringResource(R.string.add_exercise))
 
             }
         }
@@ -590,7 +608,7 @@ fun ExerciseSelectionDialog(
                 .padding(16.dp)
         ) {
             Text(
-                text = "Select an Exercise",
+                text = stringResource(R.string.select_an_exercise),
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 

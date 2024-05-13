@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
@@ -20,6 +21,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.msprg.exerciseTracker.ExTrApplication
+import com.msprg.exerciseTracker.R
 import com.msprg.exerciseTracker.data.ExercisesList
 import com.msprg.exerciseTracker.data.RoutinesList
 import com.msprg.exerciseTracker.ui.screens.ExerciseItemEditScreen
@@ -103,7 +105,7 @@ fun AppNavCtl(
                 } else {
                     Toast.makeText(
                         ExTrApplication.appContext,
-                        "No such item found :(",
+                        stringResource(R.string.no_such_item_found),
                         Toast.LENGTH_SHORT
                     ).show()
 

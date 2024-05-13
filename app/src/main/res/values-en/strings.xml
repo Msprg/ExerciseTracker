@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Exercise Tracker</string>
+    <string name="no_such_item_found">No such item found :(</string>
+    <string name="back">Back</string>
+    <string name="edit">Edit</string>
+    <string name="duration_seconds">Duration: %1$s (seconds)</string>
+    <string name="save">Save</string>
+    <string name="duration_of_exercise_seconds">Duration of Exercise (seconds)</string>
+    <string name="description">Description</string>
+    <string name="selected_date">Selected date: %1$s</string>
+    <string name="routine_not_finished">Routine not finished</string>
+    <string name="start">Start: %1$s %2$s %3$s</string>
+    <string name="duration_m_s">Duration: %1$sm %2$ss</string>
+    <string name="add">Add</string>
+    <string name="cannot_play_empty_routine">Cannot play empty routine</string>
+    <string name="tap_on_the_routine_to_add_some_exercises">Tap on the routine to add some exercises</string>
+    <string name="play">Play</string>
+    <string name="exercise_not_found_skipping">Exercise %1$s not found. Skipping...</string>
+    <string name="end_of_routine">End of routine</string>
+    <string name="duration_seconds_repetitions">Duration: %1$s seconds, Repetitions: %2$s</string>
+    <string name="title">Title</string>
+    <string name="duration">"Duration: %1$s, "</string>
+    <string name="repetitions">Repetitions: %1$s</string>
+    <string name="decrease_repetitions">Decrease repetitions</string>
+    <string name="increase_repetitions">Increase repetitions</string>
+    <string name="move_up">Move Up</string>
+    <string name="move_down">Move Down</string>
+    <string name="add_exercise">Add Exercise</string>
+    <string name="select_an_exercise">Select an Exercise</string>
+    <string name="exercises">Exercises</string>
+    <string name="routines">Routines</string>
+    <string name="schedule">Schedule</string>
+    <string name="history">History</string>
+</resources>

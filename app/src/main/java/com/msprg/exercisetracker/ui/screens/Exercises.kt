@@ -51,6 +51,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -61,6 +62,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import com.msprg.exerciseTracker.ExTrApplication
+import com.msprg.exerciseTracker.R
 import com.msprg.exerciseTracker.data.ExerciseIcon
 import com.msprg.exerciseTracker.data.ExerciseItem
 import com.msprg.exerciseTracker.data.ExercisesList
@@ -172,7 +174,12 @@ fun ExerciseItemViewScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(
+                                R.string.back
+                            )
+                        )
                     }
                 }
             )
@@ -182,7 +189,7 @@ fun ExerciseItemViewScreen(
                 onClick = onEditPressed,
                 shape = CircleShape
             ) {
-                Icon(Icons.Rounded.Edit, contentDescription = "Edit")
+                Icon(Icons.Rounded.Edit, contentDescription = stringResource(R.string.edit))
             }
         }
     ) { innerPadding ->
@@ -214,7 +221,7 @@ fun ExerciseItemViewScreen(
             }
 
             Text(
-                text = "Duration: ${exerciseItem.durationSeconds} (seconds)",
+                text = stringResource(R.string.duration_seconds, exerciseItem.durationSeconds),
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .padding(16.dp)
@@ -330,7 +337,7 @@ fun ExerciseItemEditScreen(
                 },
                 shape = CircleShape
             ) {
-                Icon(Icons.Rounded.Check, contentDescription = "Save")
+                Icon(Icons.Rounded.Check, contentDescription = stringResource(R.string.save))
             }
         }
     ) { innerPadding ->
@@ -388,7 +395,7 @@ fun ExerciseItemEditScreen(
                 onValueChange = { newValue ->
                     editedDuration = newValue.filter { it.isDigit() }
                 },
-                label = { Text("Duration of Exercise (seconds)") },
+                label = { Text(stringResource(R.string.duration_of_exercise_seconds)) },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number,
                     imeAction = ImeAction.Done
@@ -402,7 +409,7 @@ fun ExerciseItemEditScreen(
             OutlinedTextField(
                 value = editedDescription,
                 onValueChange = { editedDescription = it },
-                label = { Text("Description") },
+                label = { Text(stringResource(R.string.description)) },
                 minLines = 12,
                 modifier = Modifier
                     .fillMaxWidth()

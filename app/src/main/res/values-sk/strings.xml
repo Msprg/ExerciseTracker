@@ -1,9 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Cvičebné Plány</string>
-    <string name="rowitemtitle" translatable="false">RowItemTitle</string>
-    <string name="rowitemdescription" translatable="false">RowItemDescription</string>
-    <string name="mock_item_title" translatable="false">MOCK_ITEM_TITLE</string>
-    <string name="mock_item_description" translatable="false">MOCK_ITEM_DESCRIPTION</string>
     <string name="no_such_item_found">Položka sa nenašla</string>
     <string name="back">Späť</string>
     <string name="edit">Upraviť</string>

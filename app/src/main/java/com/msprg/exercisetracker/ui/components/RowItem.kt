@@ -21,9 +21,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.msprg.exerciseTracker.R
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -38,8 +40,8 @@ fun RowItem(
                 .padding(start = 8.dp)
         )
     },
-    title: String = "RowItemTitle",
-    description: String = "RowItemDescription",
+    title: String = stringResource(R.string.rowitemtitle),
+    description: String = stringResource(R.string.rowitemdescription),
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
     onDismissToStart: (() -> Unit)? = null,
@@ -103,8 +105,8 @@ fun RowItemsMockup(
                 .padding(start = 8.dp)
         )
     },
-    title: String = "MOCK_ITEM_TITLE",
-    description: String = "MOCK_ITEM_DESCRIPTION",
+    title: String = stringResource(R.string.mock_item_title),
+    description: String = stringResource(R.string.mock_item_description),
     trailingContent: @Composable (() -> Unit)? = null
 ) {
     LazyColumn(modifier = modifier) {
