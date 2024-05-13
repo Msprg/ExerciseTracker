@@ -18,7 +18,6 @@ data class RoutineItem(
     val routineDescription: String = "",
     @Serializable(with = PersistentListSerializer::class)
     val exerciseList: PersistentList<RoutineExercise> = persistentListOf(),
-//    val repetitions: Int = 1
 )
 
 @Serializable

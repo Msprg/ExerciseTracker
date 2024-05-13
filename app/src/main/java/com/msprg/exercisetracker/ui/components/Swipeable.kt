@@ -30,7 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 
-
+//kód podľa https://github.com/philipplackner/ProtoDataStoreGuide
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun <T> SwipeToDismissContainer(

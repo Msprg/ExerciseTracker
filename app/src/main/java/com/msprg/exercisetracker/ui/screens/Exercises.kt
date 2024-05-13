@@ -273,11 +273,9 @@ private fun ShowFullscreenImage(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExerciseItemEditScreen(
     exerciseItem: ExerciseItem?,
-    onBackPressed: () -> Unit,
     onSavePressed: (ExerciseItem) -> Unit
 ) {
     var editedTitle by remember { mutableStateOf(exerciseItem?.exTitle ?: "") }

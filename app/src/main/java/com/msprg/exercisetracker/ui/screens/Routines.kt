@@ -31,7 +31,6 @@ import androidx.compose.material.icons.outlined.EventRepeat
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -44,6 +43,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -132,11 +133,11 @@ fun RoutinesScreen(
                     trailingContent = {
                         IconButton(
                             onClick = {
-                                val verifiedExerciseList = VerifyDataLinkageIntegrity(
+                                val verifiedExerciseList = verifyDataLinkageIntegrity(
                                     listOf(routineItem),
                                     exerciseData.excList
                                 ).firstOrNull()?.exerciseList
-                                if (verifiedExerciseList != null && verifiedExerciseList.isNotEmpty()) {
+                                if (!verifiedExerciseList.isNullOrEmpty()) {
                                     navCtl.navigate("${Screens.PlayRoutineScreen.name}/${routineItem.id}")
                                 } else {
                                     // Display a toast with an error message
@@ -177,12 +178,12 @@ fun PlayRoutineScreen(
     historyViewModel: HistoryViewModel = HistoryViewModel(ExTrApplication.datastoremodule)
 ) {
     val exerciseData by viewModel.exerciseDataFlow.collectAsState(initial = ExercisesList())
-    var currentExerciseIndex by remember { mutableStateOf(0) }
+    var currentExerciseIndex by remember { mutableIntStateOf(0) }
     val currentExercise = exerciseList.getOrNull(currentExerciseIndex)
     val exercise =
         currentExercise?.let { exerciseData.excList.find { it.id == currentExercise.exerciseId } }
 
-    var progress by remember { mutableStateOf(0f) }
+    var progress by remember { mutableFloatStateOf(0f) }
 
     LaunchedEffect(Unit) {
         var historyItemId: String? = null
@@ -293,7 +294,7 @@ fun PlayRoutineScreen(
     }
 }
 
-fun VerifyDataLinkageIntegrity(
+fun verifyDataLinkageIntegrity(
     routines: List<RoutineItem>,
     exercises: List<ExerciseItem>
 ): List<RoutineItem> {
@@ -305,11 +306,9 @@ fun VerifyDataLinkageIntegrity(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoutineItemEditScreen(
     routineItem: RoutineItem?,
-    onBackPressed: () -> Unit,
     onSavePressed: (RoutineItem) -> Unit,
     viewModel: ExercisesViewModel = ExercisesViewModel(ExTrApplication.datastoremodule)
 ) {
@@ -323,7 +322,7 @@ fun RoutineItemEditScreen(
 
     LaunchedEffect(exerciseData) {
         if (editedExerciseList.isNotEmpty()) {
-            val verifiedExerciseList = VerifyDataLinkageIntegrity(
+            val verifiedExerciseList = verifyDataLinkageIntegrity(
                 listOf(RoutineItem(exerciseList = editedExerciseList)),
                 exerciseData.excList
             ).firstOrNull()?.exerciseList

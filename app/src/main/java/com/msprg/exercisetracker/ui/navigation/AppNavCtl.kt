@@ -119,7 +119,6 @@ fun AppNavCtl(
                 val exerciseItem = exerciseData.excList.find { it.id == exerciseItemUUID }
                 ExerciseItemEditScreen(
                     exerciseItem = exerciseItem,
-                    onBackPressed = { navController.popBackStack() },
                     onSavePressed = { updatedExerciseItem ->
                         viewModel.updateExerciseItem(updatedExerciseItem)
                         navController.popBackStack()
@@ -131,7 +130,6 @@ fun AppNavCtl(
             ) {
                 ExerciseItemEditScreen(
                     exerciseItem = null,
-                    onBackPressed = { navController.popBackStack() },
                     onSavePressed = { newExerciseItem ->
                         viewModel.addExerciseItem(
                             icon = newExerciseItem.icon,
@@ -153,7 +151,6 @@ fun AppNavCtl(
                 val routineItem = routinesData.routineList.find { it.id == routineItemId }
                 RoutineItemEditScreen(
                     routineItem = routineItem,
-                    onBackPressed = { navController.popBackStack() },
                     onSavePressed = { updatedRoutineItem ->
                         routinesViewModel.updateRoutine(updatedRoutineItem)
                         navController.popBackStack()
@@ -164,7 +161,6 @@ fun AppNavCtl(
             composable(route = Screens.RoutineItemEditScreen.name) {
                 RoutineItemEditScreen(
                     routineItem = null,
-                    onBackPressed = { navController.popBackStack() },
                     onSavePressed = { newRoutineItem ->
                         routinesViewModel.addRoutine(newRoutineItem)
                         navController.popBackStack()
