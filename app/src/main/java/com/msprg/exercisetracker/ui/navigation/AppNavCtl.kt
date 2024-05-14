@@ -37,7 +37,7 @@ import com.msprg.exerciseTracker.ui.viewmodels.RoutinesViewModel
 
 @Composable
 fun AppNavCtl(
-    startingScreen: Screens = Screens.HistoryScreen,
+    startingScreen: Screens = Screens.ExercisesScreen,
     viewModel: ExercisesViewModel = ExercisesViewModel(ExTrApplication.datastoremodule),
     routinesViewModel: RoutinesViewModel = RoutinesViewModel(ExTrApplication.datastoremodule)
 ) {
